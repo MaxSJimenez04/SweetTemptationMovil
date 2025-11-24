@@ -11,6 +11,7 @@ activity = "1.12.0"
 constraintlayout = "2.2.1"
 
 [libraries]
+converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterScalars" }
 converter-scalars = { module = "com.squareup.retrofit2:converter-scalars", version.ref = "converterScalars" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
