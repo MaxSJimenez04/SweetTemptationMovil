@@ -47,7 +47,9 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:3.0.0'
     implementation libs.converter.scalars
     implementation libs.converter.gson
-    implementation libs.converter.moshi
+    //noinspection UseTomlInstead
+    implementation "com.squareup.retrofit2:converter-moshi:3.0.0"
+    implementation "com.squareup.okhttp3:logging-interceptor:4.9.3"
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
