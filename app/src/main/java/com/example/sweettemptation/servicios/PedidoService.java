@@ -67,26 +67,26 @@ public class PedidoService {
            public void onResponse(Call<Void> call, Response<Void> response) {
                if (response.isSuccessful()){
                    cb.onResult(ApiResult.exito(response.body(), response.code()));
-               }else {
-                   int codigo = response.code();
+                   return;
+               }
+               int codigo = response.code();
 
-                   switch (codigo){
-                       case 400:
-                           cb.onResult(ApiResult.fallo(codigo, "El ID del cliente es inválido"));
-                           break;
-                       case 403:
-                           cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_NO_AUTORIZADO));
-                           break;
-                       case 500:
-                           cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_FALLA_SERVIDOR));
-                           break;
-                       default:
-                           String mensaje = ValidacionesRespuesta.leerErrorBody(response.errorBody());
-                           if (mensaje == null || mensaje.isBlank())
-                               mensaje = "Error: " + codigo;
-                           cb.onResult(ApiResult.fallo(codigo, mensaje));
-                           break;
-                   }
+               switch (codigo){
+                   case 400:
+                       cb.onResult(ApiResult.fallo(codigo, "El ID del cliente es inválido"));
+                       break;
+                   case 403:
+                       cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_NO_AUTORIZADO));
+                       break;
+                   case 500:
+                       cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_FALLA_SERVIDOR));
+                       break;
+                   default:
+                       String mensaje = ValidacionesRespuesta.leerErrorBody(response.errorBody());
+                       if (mensaje == null || mensaje.isBlank())
+                           mensaje = "Error: " + codigo;
+                       cb.onResult(ApiResult.fallo(codigo, mensaje));
+                       break;
                }
            }
 
@@ -108,28 +108,28 @@ public class PedidoService {
            public void onResponse(Call<Void> call, Response<Void> response) {
                if (response.isSuccessful()){
                    cb.onResult(ApiResult.exito(response.body(), response.code()));
-               }else {
-                   int codigo = response.code();
-                   switch (codigo){
-                       case 400:
-                           cb.onResult(ApiResult.fallo(codigo, "El pedido no existe o ya se ha cancelado/pagado"));
-                           break;
-                       case 403:
-                           cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_NO_AUTORIZADO));
-                           break;
-                       case 404:
-                           cb.onResult(ApiResult.fallo(codigo, "No se encontró el pedido"));
-                           break;
-                       case 500:
-                           cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_FALLA_SERVIDOR));
-                           break;
-                       default:
-                           String mensaje = ValidacionesRespuesta.leerErrorBody(response.errorBody());
-                           if (mensaje == null || mensaje.isBlank())
-                               mensaje = "Error: " + codigo;
-                           cb.onResult(ApiResult.fallo(codigo, mensaje));
-                           break;
-                   }
+                   return;
+               }
+               int codigo = response.code();
+               switch (codigo){
+                   case 400:
+                       cb.onResult(ApiResult.fallo(codigo, "El pedido no existe o ya se ha cancelado/pagado"));
+                       break;
+                   case 403:
+                       cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_NO_AUTORIZADO));
+                       break;
+                   case 404:
+                       cb.onResult(ApiResult.fallo(codigo, "No se encontró el pedido"));
+                       break;
+                   case 500:
+                       cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_FALLA_SERVIDOR));
+                       break;
+                   default:
+                       String mensaje = ValidacionesRespuesta.leerErrorBody(response.errorBody());
+                       if (mensaje == null || mensaje.isBlank())
+                           mensaje = "Error: " + codigo;
+                       cb.onResult(ApiResult.fallo(codigo, mensaje));
+                       break;
                }
            }
 
