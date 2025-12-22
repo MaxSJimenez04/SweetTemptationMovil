@@ -1,52 +1,73 @@
 package com.example.sweettemptation.network;
 
+import android.content.Context;
+
 import com.example.sweettemptation.utils.Constantes;
+import com.squareup.moshi.Moshi;
 
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.moshi.MoshiConverterFactory;
+import com.example.sweettemptation.auth.TokenStorage;
+import com.example.sweettemptation.auth.AuthInterceptor;
 
-public class ApiCliente {
-    private static final String URL_BASE = Constantes.URL;
-    private static Retrofit retrofit;
-    private static String token;
+public final class ApiCliente {
 
-    public static void setToken(String t){
-        token = t;
-        retrofit = null;
+    private static volatile ApiCliente instance;
+
+    private final Retrofit retrofit;
+
+    private ApiCliente(Context context) {
+        Context appContext = context.getApplicationContext();
+
+        TokenStorage tokenStorage = new TokenStorage(appContext);
+
+        Moshi moshi = new Moshi.Builder().build();
+
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient okHttp = new OkHttpClient.Builder()
+                .callTimeout(5, TimeUnit.SECONDS)
+
+                // Timeouts por fase (ajusta a gusto)
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
+                .writeTimeout(20, TimeUnit.SECONDS)
+
+                .addInterceptor(new AuthInterceptor(tokenStorage))
+                .addInterceptor(logging)
+                .build();
+
+        retrofit = new Retrofit.Builder()
+                .baseUrl(Constantes.URL)
+                .client(okHttp)
+                .addConverterFactory(MoshiConverterFactory.create(moshi))
+                .build();
     }
 
-    public static Retrofit getClient() {
-        if (retrofit == null) {
-            OkHttpClient client = new OkHttpClient.Builder()
-                    .addInterceptor(chain -> {
-                        Request original = chain.request();
-                        Request.Builder rb = original.newBuilder()
-                                .header("Accept", "application/json");
-                        if (token != null && !token.isEmpty()) {
-                            rb.header("Authorization", "Bearer " + token);
-                        }
-                        return chain.proceed(rb.build());
-                    })
-                    .addInterceptor(new HttpLoggingInterceptor()
-                            .setLevel(HttpLoggingInterceptor.Level.BODY))
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(10, TimeUnit.SECONDS)
-                    .writeTimeout(20, TimeUnit.SECONDS)
-                    .build();
-
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(URL_BASE)
-                    .client(client)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
+    public static void init(Context context) {
+        if (instance == null) {
+            synchronized (ApiCliente.class) {
+                if (instance == null) {
+                    instance = new ApiCliente(context);
+                }
+            }
         }
+    }
+
+    public static ApiCliente getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("ApiCliente no inicializado. Llama ApiCliente.init(context) en Application/Activity.");
+        }
+        return instance;
+    }
+
+    // Si quieres exponer Retrofit:
+    public Retrofit retrofit() {
         return retrofit;
     }
-
-
 }
