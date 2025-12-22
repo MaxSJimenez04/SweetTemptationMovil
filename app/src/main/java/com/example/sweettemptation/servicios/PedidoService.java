@@ -3,14 +3,8 @@ package com.example.sweettemptation.servicios;
 import com.example.sweettemptation.dto.PedidoDTO;
 import com.example.sweettemptation.interfaces.ApiResult;
 import com.example.sweettemptation.interfaces.PedidoApi;
+import com.example.sweettemptation.network.ValidacionesRespuesta;
 import com.example.sweettemptation.utils.Constantes;
-
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
-
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -48,7 +42,7 @@ public class PedidoService {
                        cb.onResult(ApiResult.fallo(404, "No se encontró el cliente especificado"));
                        break;
                    default:
-                       String mensaje = leerErrorBody(response.errorBody());
+                       String mensaje = ValidacionesRespuesta.leerErrorBody(response.errorBody());
                        if (mensaje == null || mensaje.isBlank())
                            mensaje = "Error: " + codigo;
                        cb.onResult(ApiResult.fallo(codigo, mensaje));
@@ -58,7 +52,7 @@ public class PedidoService {
 
            @Override
            public void onFailure(Call<PedidoDTO> call, Throwable t) {
-               if (esDesconexion(t)){
+               if (ValidacionesRespuesta.esDesconexion(t)){
                    cb.onResult(ApiResult.fallo(503, Constantes.MENSAJE_SIN_CONEXION));
                }
            }
@@ -87,7 +81,7 @@ public class PedidoService {
                            cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_FALLA_SERVIDOR));
                            break;
                        default:
-                           String mensaje = leerErrorBody(response.errorBody());
+                           String mensaje = ValidacionesRespuesta.leerErrorBody(response.errorBody());
                            if (mensaje == null || mensaje.isBlank())
                                mensaje = "Error: " + codigo;
                            cb.onResult(ApiResult.fallo(codigo, mensaje));
@@ -98,7 +92,7 @@ public class PedidoService {
 
            @Override
            public void onFailure(Call<Void> call, Throwable t) {
-               if (esDesconexion(t)){
+               if (ValidacionesRespuesta.esDesconexion(t)){
                    cb.onResult(ApiResult.fallo(503, Constantes.MENSAJE_SIN_CONEXION));
                }
            }
@@ -130,7 +124,7 @@ public class PedidoService {
                            cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_FALLA_SERVIDOR));
                            break;
                        default:
-                           String mensaje = leerErrorBody(response.errorBody());
+                           String mensaje = ValidacionesRespuesta.leerErrorBody(response.errorBody());
                            if (mensaje == null || mensaje.isBlank())
                                mensaje = "Error: " + codigo;
                            cb.onResult(ApiResult.fallo(codigo, mensaje));
@@ -141,7 +135,7 @@ public class PedidoService {
 
            @Override
            public void onFailure(Call<Void> call, Throwable t) {
-               if (esDesconexion(t)){
+               if (ValidacionesRespuesta.esDesconexion(t)){
                    cb.onResult(ApiResult.fallo(503, Constantes.MENSAJE_SIN_CONEXION));
                }
            }
@@ -149,19 +143,5 @@ public class PedidoService {
        return call;
    }
 
-    private boolean esDesconexion(Throwable t) {
-        return (t instanceof UnknownHostException)
-                || (t instanceof ConnectException)
-                || (t instanceof SocketTimeoutException)
-                || (t instanceof IOException);
-    }
 
-    private String leerErrorBody(ResponseBody errorBody) {
-        if (errorBody == null) return null;
-        try {
-            return errorBody.string();
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }
