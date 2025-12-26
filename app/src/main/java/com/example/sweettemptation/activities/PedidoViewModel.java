@@ -1,5 +1,8 @@
 package com.example.sweettemptation.activities;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -50,11 +53,11 @@ public class PedidoViewModel extends ViewModel {
         this.archivoService = new ArchivoService(archivoApi);
     }
 
-    public LiveData<Pedido> getPedidoActual(int idCliente){
+    public LiveData<Pedido> getPedidoActual(){
         return pedidoActual;
     }
 
-    public LiveData<List<DetallesProductoDTO>> getProductosPedido(int idPedido){
+    public LiveData<List<DetallesProductoDTO>> getProductosPedido(){
         return productosPedido;
     }
 
@@ -78,6 +81,18 @@ public class PedidoViewModel extends ViewModel {
         return archivoProducto;
     }
 
+    public LiveData<BigDecimal> getSubtotalPedido(){
+        return subtotalPedido;
+    }
+
+    public LiveData<BigDecimal> getTotalPedido(){
+        return totalPedido;
+    }
+
+    public int getIVA(){
+        return Constantes.IVA;
+    }
+
     private BigDecimal calcularTotal(){
         BigDecimal subtotal = BigDecimal.ZERO;
         BigDecimal total = BigDecimal.ZERO;
@@ -89,7 +104,7 @@ public class PedidoViewModel extends ViewModel {
         }
         subtotal = BigDecimal.valueOf(subtotalOperacion);
         subtotalPedido.postValue(subtotal);
-        BigDecimal parseoIVA = BigDecimal.valueOf(Constantes.IVA);
+        BigDecimal parseoIVA = BigDecimal.valueOf(Constantes.IVA/100);
         total = subtotal.multiply(parseoIVA);
         totalPedido.postValue(total);
         return total;
@@ -245,6 +260,7 @@ public class PedidoViewModel extends ViewModel {
                 if (result.codigo == 200){
                     cargando.postValue(false);
                     consultarProductosPedido(idPedido);
+                    consultarProductosPedido(idPedido);
                 }else {
                     cargando.postValue(false);
                     mensaje.postValue(result.mensaje);
@@ -281,6 +297,7 @@ public class PedidoViewModel extends ViewModel {
         if (ruta == null){
             cargando.postValue(false);
             mensaje.postValue("Ruta vacía");
+            return;
         }
 
         try{
@@ -331,5 +348,18 @@ public class PedidoViewModel extends ViewModel {
             throw new IllegalArgumentException("El idArchivo no es numérico: '" + idArchivo + "' (ruta: " + ruta + ")", e);
         }
     }
+
+    public interface ImagenCallback {
+        void onOk(int idProducto, ArchivoDTO archivo);
+        void onError(int idProducto, String mensaje);
+    }
+
+    public void cargarImagenProducto(int idProducto, ImagenCallback cb) {
+       obtenerRutaArchivo(idProducto);
+       DetallesArchivoDTO detallesImagen = getDetallesArchivo().getValue();
+       obtenerArchivo(detallesImagen.getRuta());
+    }
+
+
 
 }
