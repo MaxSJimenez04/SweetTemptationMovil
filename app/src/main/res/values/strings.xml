@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">SweetTemptation</string>
+    <string name="btnCancelar">Cancelar</string>
+    <string name="btnRealizarPedido">Realizar Pedido</string>
+    <string name="btnGuardarCambios">Guardar Cambios</string>
+    <string name="pedidoTitulo">Mi Pedido</string>
+    <string name="txtTotal">Total: $</string>
+    <string name="txtSubtotal">Subtotal: $</string>
+    <string name="txtIVA">IVA: 16%</string>
+
 </resources>
