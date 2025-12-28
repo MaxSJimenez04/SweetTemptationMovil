@@ -17,6 +17,7 @@
 
     <item
         android:id="@+id/btnProductos"
+        android:title="Productos"
         android:icon="@drawable/icon_productos"
         app:showAsAction="ifRoom"
         />
