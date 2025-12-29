@@ -132,12 +132,12 @@ public class pedido extends Fragment {
         });
 
         btnEditar.setOnClickListener(v ->{
-            btnGuardarCambios.setVisibility(0);
+            btnGuardarCambios.setVisibility(View.VISIBLE);
             adapter.setModoEdicion(true);
         });
         btnGuardarCambios.setOnClickListener(v -> {
             adapter.setModoEdicion(false);
-            btnGuardarCambios.setVisibility(8);
+            btnGuardarCambios.setVisibility(View.GONE);
         });
 
         // Eventos UI
