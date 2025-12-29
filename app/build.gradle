@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
+    id 'com.google.protobuf' version "0.9.6"
+
 }
 
 android {
@@ -30,8 +32,16 @@ android {
     }
 
     buildFeatures{
-        dataBinding true
-        viewBinding true
+        dataBinding = true
+        viewBinding = true
+    }
+
+    sourceSets {
+        main {
+            proto {
+                srcDir "src/main/proto"
+            }
+        }
     }
 }
 
@@ -52,6 +62,14 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-moshi:3.0.0"
     //noinspection UseTomlInstead
     implementation "com.squareup.okhttp3:logging-interceptor:5.3.2"
+    //noinspection UseTomlInstead
+    implementation "io.grpc:grpc-okhttp:1.78.0"
+    //noinspection UseTomlInstead
+    implementation "io.grpc:grpc-stub:1.78.0"
+    //noinspection UseTomlInstead
+    implementation "io.grpc:grpc-protobuf-lite:1.78.0"
+    //noinspection UseTomlInstead
+    implementation "com.google.protobuf:protobuf-javalite:4.33.2"
     implementation libs.annotation
     implementation libs.lifecycle.livedata.ktx
     implementation libs.lifecycle.viewmodel.ktx
@@ -59,4 +77,25 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+
+    compileOnly "javax.annotation:javax.annotation-api:1.3.2"
+}
+
+protobuf {
+    protoc { artifact = "com.google.protobuf:protoc:4.33.2" }
+
+    plugins {
+        grpc { artifact = "io.grpc:protoc-gen-grpc-java:1.78.0" }
+    }
+
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java { option "lite" }
+            }
+            task.plugins {
+                grpc { option "lite" }   // <- ESTO ES LO QUE TE FALTABA
+            }
+        }
+    }
 }
