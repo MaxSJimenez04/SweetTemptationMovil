@@ -55,7 +55,7 @@ public class pedido extends Fragment {
         tvIva = view.findViewById(R.id.txtIva);
         recycler = view.findViewById(R.id.rvPedido);
 
-        // Botones (ajusta ids)
+        // Botones
         View btnCancelar = view.findViewById(R.id.btnCancelar);
         View btnPagar = view.findViewById(R.id.btnRealizarPedido);
         View btnEditar = view.findViewById(R.id.btnEditar);
