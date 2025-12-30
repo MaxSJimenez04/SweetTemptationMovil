@@ -10,6 +10,7 @@
     <string name="estadisticasProductoTitulo">Estadísticas</string>
     <string name="headerProducto">Producto</string>
     <string name="headerVentas">No. Ventas</string>
-
+    <string name="txtSinProductos">No hay productos seleccionados.\nEmpieza seleccionando un producto</string>
+    <string name="btnProductos">Productos</string>
 
 </resources>

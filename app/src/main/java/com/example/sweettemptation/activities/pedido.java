@@ -60,6 +60,8 @@ public class pedido extends Fragment {
         View btnPagar = view.findViewById(R.id.btnRealizarPedido);
         View btnEditar = view.findViewById(R.id.btnEditar);
         View btnGuardarCambios = view.findViewById(R.id.btnGuardarCambios);
+        View btnProductos = view.findViewById(R.id.btnProductos);
+        View txtSinProducto = view.findViewById(R.id.txtSinProductos);
 
         // Inicializa ViewModel
         mViewModel = new ViewModelProvider(requireActivity()).get(PedidoViewModel.class);
@@ -128,7 +130,12 @@ public class pedido extends Fragment {
         recycler.setAdapter(adapter);
 
         mViewModel.getProductosPedido(/* idPedido */).observe(getViewLifecycleOwner(), lista -> {
-            adapter.submitList(lista);
+            if (lista !=  null) {
+                adapter.submitList(lista);
+            }else{
+                btnProductos.setVisibility(View.VISIBLE);
+                txtSinProducto.setVisibility(View.VISIBLE);
+            }
         });
 
         btnEditar.setOnClickListener(v ->{
@@ -138,6 +145,9 @@ public class pedido extends Fragment {
         btnGuardarCambios.setOnClickListener(v -> {
             adapter.setModoEdicion(false);
             btnGuardarCambios.setVisibility(View.GONE);
+        });
+        btnProductos.setOnClickListener(v -> {
+            //TODO: navegar a página productos
         });
 
         // Eventos UI
