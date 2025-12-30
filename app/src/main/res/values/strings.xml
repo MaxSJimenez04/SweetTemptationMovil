@@ -7,5 +7,7 @@
     <string name="txtTotal">Total: $</string>
     <string name="txtSubtotal">Subtotal: $</string>
     <string name="txtIVA">IVA: 16%</string>
+    <string name="txtSinProductos">No hay productos seleccionados.\nEmpieza seleccionando un producto</string>
+    <string name="btnProductos">Productos</string>
 
 </resources>
