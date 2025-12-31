@@ -6,9 +6,7 @@ plugins {
 
 android {
     namespace 'com.example.sweettemptation'
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.example.sweettemptation"
@@ -41,6 +39,12 @@ android {
             proto {
                 srcDir "src/main/proto"
             }
+        }
+    }
+
+    packaging {
+        resources {
+            excludes += ['META-INF/versions/9/OSGI-INF/MANIFEST.MF']
         }
     }
 }
