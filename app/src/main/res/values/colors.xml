@@ -2,4 +2,17 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    
+    <!-- Sweet Temptation Brand Colors -->
+    <color name="primary">#E91E63</color>
+    <color name="primary_dark">#C2185B</color>
+    <color name="primary_light">#F8BBD9</color>
+    <color name="accent">#FF4081</color>
+    <color name="background">#FFF8E1</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="text_primary">#3E2723</color>
+    <color name="text_secondary">#5D4037</color>
+    <color name="text_hint">#8D6E63</color>
+    <color name="error">#D32F2F</color>
+    <color name="link">#E91E63</color>
 </resources>
