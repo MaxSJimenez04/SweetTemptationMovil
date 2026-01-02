@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="rangos_fechas">
+        <item>Selecciona un rango de fechas</item>
+        <item>Semana pasada</item>
+        <item>Quincena pasada</item>
+        <item>Mes pasado</item>
+    </string-array>
+</resources>
