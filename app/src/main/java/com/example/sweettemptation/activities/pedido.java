@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -142,11 +143,14 @@ public class pedido extends Fragment {
 
             btnEditar.setOnClickListener(v -> {
                 btnGuardarCambios.setVisibility(View.VISIBLE);
+                btnEditar.setVisibility(View.INVISIBLE);
                 adapter.setModoEdicion(true);
             });
             btnGuardarCambios.setOnClickListener(v -> {
                 adapter.setModoEdicion(false);
+                mViewModel.recalcularTotal(pedidoActual.getId());
                 btnGuardarCambios.setVisibility(View.GONE);
+                btnEditar.setVisibility(View.VISIBLE);
             });
             btnProductos.setOnClickListener(v -> {
                 //TODO: navegar a página productos
