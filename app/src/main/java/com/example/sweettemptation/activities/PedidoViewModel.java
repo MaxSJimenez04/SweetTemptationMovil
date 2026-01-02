@@ -93,9 +93,9 @@ public class PedidoViewModel extends ViewModel {
         return Constantes.IVA;
     }
 
-    private BigDecimal calcularTotal(){
-        BigDecimal subtotal = BigDecimal.ZERO;
-        BigDecimal total = BigDecimal.ZERO;
+    public void calcularTotal(){
+        BigDecimal subtotal;
+        BigDecimal total;
         double subtotalOperacion = 0;
         List<DetallesProductoDTO> productosSubtotales = productosPedido.getValue();
         for (DetallesProductoDTO productoPedido :productosSubtotales) {
@@ -104,10 +104,12 @@ public class PedidoViewModel extends ViewModel {
         }
         subtotal = BigDecimal.valueOf(subtotalOperacion);
         subtotalPedido.postValue(subtotal);
-        BigDecimal parseoIVA = BigDecimal.valueOf(Constantes.IVA/100);
-        total = subtotal.multiply(parseoIVA);
+        BigDecimal ivaRate = BigDecimal.valueOf(Constantes.IVA)
+                .divide(BigDecimal.valueOf(100));
+
+        BigDecimal iva = subtotal.multiply(ivaRate);
+        total = subtotal.add(iva);
         totalPedido.postValue(total);
-        return total;
     }
 
 
@@ -115,27 +117,36 @@ public class PedidoViewModel extends ViewModel {
     public void cargarPedidoActual(int idCliente){
         cargando.setValue(true);
         mensaje.setValue(null);
-        Call<PedidoDTO> callServicio = pedidoService.obtenerPedidoActual(idCliente, new PedidoService.ResultCallback<PedidoDTO>() {
-            @Override
-            public void onResult(ApiResult<PedidoDTO> result) {
+
+        pedidoService.obtenerPedidoActual(idCliente, result -> {
+            try {
+                cargando.postValue(false);
+
+                if (result == null) {
+                    pedidoActual.postValue(null);
+                    mensaje.postValue("ApiResult null");
+                    return;
+                }
+
                 if (result.codigo == 200){
                     if (result.datos == null){
-                        cargando.postValue(false);
-                        mensaje.postValue("No se encontró pedido actual");
                         pedidoActual.postValue(null);
-                    }else{
-                        cargando.postValue(false);
-                        PedidoDTO respuesta = result.datos;
-                        Pedido respuestaApi = new Pedido(respuesta.getId(), respuesta.getFechaCompra(), respuesta.getActual(),
-                                respuesta.getTotal(), respuesta.getEstado(),respuesta.getPersonalizado(),
-                                respuesta.getIdCliente());
-                        pedidoActual.postValue(respuestaApi);
+                        mensaje.postValue("No se encontró pedido actual");
+                        crearPedido(idCliente);
+                    } else {
+                        PedidoDTO dto = result.datos;
+                        Pedido p = new Pedido(dto.getId(), dto.getFechaCompra(), dto.getActual(),
+                                dto.getTotal(), dto.getEstado(), dto.getPersonalizado(), dto.getIdCliente());
+                        pedidoActual.postValue(p);
                     }
-
-                }else{
-                    cargando.postValue(false);
-                    mensaje.postValue(result.mensaje);
+                } else {
+                    mensaje.postValue(result.mensaje != null ? result.mensaje : ("Error " + result.codigo));
                 }
+
+            } catch (Exception e) {
+                cargando.postValue(false);
+                pedidoActual.postValue(null);
+                mensaje.postValue("CRASH en callback: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             }
         });
     }
@@ -232,22 +243,18 @@ public class PedidoViewModel extends ViewModel {
     public void recalcularTotal(int idPedido){
         mensaje.setValue(null);
         cargando.setValue(true);
-        BigDecimal total = calcularTotal();
-        Call<PedidoDTO> callServicio = productoPedidoService.recalcularTotal(idPedido, total, new ProductoPedidoService.ResultCallBack<PedidoDTO>() {
-            @Override
-            public void onResult(ApiResult<PedidoDTO> result) {
-              if (result.codigo == 200){
-                  cargando.postValue(false);
-                  PedidoDTO respuesta = result.datos;
-                  Pedido pedidoActualizado = new Pedido(respuesta.getId(),respuesta.getFechaCompra(),
-                          respuesta.getActual(), respuesta.getTotal(), respuesta.getEstado(), respuesta.getPersonalizado(),
-                          respuesta.getIdCliente());
-                  pedidoActual.postValue(pedidoActualizado);
-              }else{
-                  cargando.postValue(false);
-                  mensaje.postValue(result.mensaje);
-              }
-            }
+        BigDecimal total = getTotalPedido().getValue();
+        productoPedidoService.recalcularTotal(idPedido, total, result -> {
+            cargando.postValue(false);
+            if (result.codigo == 200){
+              PedidoDTO respuesta = result.datos;
+              Pedido pedidoActualizado = new Pedido(respuesta.getId(),respuesta.getFechaCompra(),
+                      respuesta.getActual(), respuesta.getTotal(), respuesta.getEstado(), respuesta.getPersonalizado(),
+                      respuesta.getIdCliente());
+              pedidoActual.postValue(pedidoActualizado);
+          }else{
+              mensaje.postValue(result.mensaje);
+          }
         });
     }
 

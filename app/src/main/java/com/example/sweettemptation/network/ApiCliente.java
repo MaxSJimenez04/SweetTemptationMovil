@@ -25,7 +25,9 @@ public final class ApiCliente {
 
         TokenStorage tokenStorage = new TokenStorage(appContext);
 
-        Moshi moshi = new Moshi.Builder().build();
+        Moshi moshi = new Moshi.Builder().
+                add(new LocalDateTimeJsonAdapter()).
+                add(new BigDecimalJsonAdapter()).build();
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);

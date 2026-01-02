@@ -38,13 +38,18 @@ public class PedidoService {
                        break;
                    case 403:
                        cb.onResult(ApiResult.fallo(403, Constantes.MENSAJE_NO_AUTORIZADO));
+                       break;
                    case 404:
                        cb.onResult(ApiResult.fallo(404, "No se encontró el cliente especificado"));
                        break;
                    default:
-                       String mensaje = ValidacionesRespuesta.leerErrorBody(response.errorBody());
-                       if (mensaje == null || mensaje.isBlank())
-                           mensaje = "Error: " + codigo;
+                       String mensaje;
+                       try {
+                           mensaje = ValidacionesRespuesta.leerErrorBody(response.errorBody());
+                       } catch (Exception e) {
+                           mensaje = null;
+                       }
+                       if (mensaje == null || mensaje.isBlank()) mensaje = "Error: " + codigo;
                        cb.onResult(ApiResult.fallo(codigo, mensaje));
                        break;
                }
@@ -52,9 +57,9 @@ public class PedidoService {
 
            @Override
            public void onFailure(Call<PedidoDTO> call, Throwable t) {
-               if (ValidacionesRespuesta.esDesconexion(t)){
-                   cb.onResult(ApiResult.fallo(503, Constantes.MENSAJE_SIN_CONEXION));
-               }
+               String msg = t.getMessage();
+               if (msg == null || msg.isBlank()) msg = t.getClass().getSimpleName();
+               cb.onResult(ApiResult.fallo(503, msg));
            }
        });
        return  call;
