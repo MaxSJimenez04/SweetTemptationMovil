@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import com.example.sweettemptation.R;
 import com.example.sweettemptation.auth.TokenStorage;
@@ -49,7 +50,14 @@ public class ClienteActivity extends AppCompatActivity {
                 Toast.makeText(this, "Historial de pedidos", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (id == R.id.btnCarrito) {
-                Toast.makeText(this, "Carrito de compras", Toast.LENGTH_SHORT).show();
+                Fragment actual = getSupportFragmentManager().findFragmentById(R.id.nav_host);
+                if (!(actual instanceof pedido)) {
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.nav_host, new pedido())
+                            .addToBackStack(null)
+                            .commit();
+                }
                 return true;
             } else if (id == R.id.btnProductos) {
                 Toast.makeText(this, "Catálogo de productos", Toast.LENGTH_SHORT).show();
@@ -83,7 +91,14 @@ public class ClienteActivity extends AppCompatActivity {
                             Toast.makeText(this, "Pedidos próximamente", Toast.LENGTH_SHORT).show();
                             break;
                         case 2:
-                            Toast.makeText(this, "Carrito próximamente", Toast.LENGTH_SHORT).show();
+                            Fragment actual = getSupportFragmentManager().findFragmentById(R.id.nav_host);
+                            if (!(actual instanceof pedido)) {
+                                getSupportFragmentManager()
+                                        .beginTransaction()
+                                        .replace(R.id.nav_host, new pedido())
+                                        .addToBackStack(null)
+                                        .commit();
+                            }
                             break;
                         case 3:
                             Toast.makeText(this, "Perfil próximamente", Toast.LENGTH_SHORT).show();

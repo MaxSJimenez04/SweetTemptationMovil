@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.sweettemptation.R;
@@ -29,7 +30,7 @@ public class pedido extends Fragment {
 
     private ProgressBar progress;
     private TextView tvSubtotal, tvTotal, tvIva;
-    private int idCliente;
+    private int idCliente = 3;
     private Pedido pedidoActual;
     private RecyclerView recycler;
     private DetallesProductoAdapter adapter;
@@ -76,92 +77,93 @@ public class pedido extends Fragment {
                 Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
             }
         });
-
         mViewModel.cargarPedidoActual(idCliente);
 
         mViewModel.getPedidoActual().observe(getViewLifecycleOwner(), pedido -> {
-            if (pedido != null){
-                pedidoActual = pedido;
+            if (pedido == null) {
+                return;
             }
-        });
 
-        mViewModel.recalcularTotal(pedidoActual.getId());
+            pedidoActual = pedido;
 
-        mViewModel.consultarProductosPedido(pedidoActual.getId());
+            mViewModel.consultarProductosPedido(pedidoActual.getId());
 
-        mViewModel.getSubtotalPedido().observe(getViewLifecycleOwner(), sub -> {
-            tvSubtotal.setText("Subtotal: $" + sub);
-        });
+            mViewModel.getSubtotalPedido().observe(getViewLifecycleOwner(), sub -> {
+                tvSubtotal.setText("Subtotal: $" + sub);
+            });
 
-        mViewModel.getTotalPedido().observe(getViewLifecycleOwner(), tot -> {
-            tvTotal.setText("Total: $" + tot);
-        });
+            mViewModel.getTotalPedido().observe(getViewLifecycleOwner(), tot -> {
+                tvTotal.setText("Total: $" + tot);
+            });
 
-        tvIva.setText("IVA: " + Constantes.IVA + "%");
+            tvIva.setText("IVA: " + Constantes.IVA + "%");
 
 
             adapter = new DetallesProductoAdapter(
-                item -> {
-                    Pedido p = mViewModel.getPedidoActual().getValue();
-                    if (p != null) mViewModel.eliminarProducto(p.getId(), item.getId());
-                },
-                (item, nuevaCantidad) -> {
-                    Pedido p = mViewModel.getPedidoActual().getValue();
-                    if (p != null) {
-                        item.setCantidad(nuevaCantidad);
-                        mViewModel.actualizarProducto(p.getId(), item);
+                    item -> {
+                        Pedido p = mViewModel.getPedidoActual().getValue();
+                        if (p != null) mViewModel.eliminarProducto(p.getId(), item.getId());
+                    },
+                    (item, nuevaCantidad) -> {
+                        Pedido p = mViewModel.getPedidoActual().getValue();
+                        if (p != null) {
+                            item.setCantidad(nuevaCantidad);
+                            mViewModel.actualizarProducto(p.getId(), item);
+                        }
+                    },
+                    idProducto -> {
+                        mViewModel.cargarImagenProducto(idProducto, new PedidoViewModel.ImagenCallback() {
+                            @Override
+                            public void onOk(int idProd, ArchivoDTO archivo) {
+                                Bitmap bmp = convertirArchivoABitmap(archivo);
+                                if (bmp != null) adapter.setImagenProducto(idProd, bmp);
+                            }
+
+                            @Override
+                            public void onError(int idProd, String mensaje) {
+                                Toast.makeText(requireContext(), mensaje, Toast.LENGTH_LONG).show();
+                            }
+                        });
                     }
-                },
-                idProducto -> {
-                    mViewModel.cargarImagenProducto(idProducto, new PedidoViewModel.ImagenCallback() {
-                        @Override
-                        public void onOk(int idProd, ArchivoDTO archivo) {
-                            Bitmap bmp = convertirArchivoABitmap(archivo);
-                            if (bmp != null) adapter.setImagenProducto(idProd, bmp);
-                        }
-                        @Override
-                        public void onError(int idProd, String mensaje) {
-                            Toast.makeText(requireContext(), mensaje, Toast.LENGTH_LONG).show();
-                        }
-                    });
+            );
+
+            recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
+            recycler.setAdapter(adapter);
+
+            mViewModel.getProductosPedido().observe(getViewLifecycleOwner(), lista -> {
+                if (lista != null) {
+                    adapter.submitList(lista);
+                    mViewModel.calcularTotal();
+                } else {
+                    btnProductos.setVisibility(View.VISIBLE);
+                    txtSinProducto.setVisibility(View.VISIBLE);
                 }
-        );
+            });
 
-        recycler.setAdapter(adapter);
+            btnEditar.setOnClickListener(v -> {
+                btnGuardarCambios.setVisibility(View.VISIBLE);
+                adapter.setModoEdicion(true);
+            });
+            btnGuardarCambios.setOnClickListener(v -> {
+                adapter.setModoEdicion(false);
+                btnGuardarCambios.setVisibility(View.GONE);
+            });
+            btnProductos.setOnClickListener(v -> {
+                //TODO: navegar a página productos
+            });
 
-        mViewModel.getProductosPedido(/* idPedido */).observe(getViewLifecycleOwner(), lista -> {
-            if (lista !=  null) {
-                adapter.submitList(lista);
-            }else{
-                btnProductos.setVisibility(View.VISIBLE);
-                txtSinProducto.setVisibility(View.VISIBLE);
-            }
+            // Eventos UI
+            btnCancelar.setOnClickListener(v -> mViewModel.cancelarPedido(pedidoActual.getId()));
+
+            btnPagar.setOnClickListener(v -> {
+                // Navegación la decide el Fragment/Activity (UI)
+                // Ejemplo (Navigation Component):
+                // NavHostFragment.findNavController(this).navigate(R.id.action_pedido_to_tipoPago);
+            });
         });
-
-        btnEditar.setOnClickListener(v ->{
-            btnGuardarCambios.setVisibility(View.VISIBLE);
-            adapter.setModoEdicion(true);
-        });
-        btnGuardarCambios.setOnClickListener(v -> {
-            adapter.setModoEdicion(false);
-            btnGuardarCambios.setVisibility(View.GONE);
-        });
-        btnProductos.setOnClickListener(v -> {
-            //TODO: navegar a página productos
-        });
-
-        // Eventos UI
-        btnCancelar.setOnClickListener(v -> mViewModel.cancelarPedido(pedidoActual.getId()));
-
-        btnPagar.setOnClickListener(v -> {
-            // Navegación la decide el Fragment/Activity (UI)
-            // Ejemplo (Navigation Component):
-            // NavHostFragment.findNavController(this).navigate(R.id.action_pedido_to_tipoPago);
-        });
-
     }
 
-    private Bitmap convertirArchivoABitmap(ArchivoDTO archivo) {
+    private Bitmap convertirArchivoABitmap (ArchivoDTO archivo){
         if (archivo == null) return null;
 
         byte[] bytes = archivo.getDatos();
@@ -171,4 +173,5 @@ public class pedido extends Fragment {
         opt.inPreferredConfig = Bitmap.Config.RGB_565; // menos memoria que ARGB_8888
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.length, opt);
     }
+
 }
