@@ -35,8 +35,6 @@ public class PedidoViewModel extends ViewModel {
     public final MutableLiveData<Boolean> cargando = new MutableLiveData<>(false);
     public final MutableLiveData<String> mensaje = new MutableLiveData<>(null);
     public final MutableLiveData<ProductoPedidoDTO> productoActualizado = new MutableLiveData<>(null);
-    public final MutableLiveData<DetallesArchivoDTO> detallesArchivo = new MutableLiveData<>(null);
-    public final MutableLiveData<ArchivoDTO> archivoProducto = new MutableLiveData<>(null);
     public final MutableLiveData<BigDecimal> subtotalPedido = new MutableLiveData<>(BigDecimal.ZERO);
     public final MutableLiveData<BigDecimal> totalPedido = new MutableLiveData<>(BigDecimal.ZERO);
 
@@ -73,13 +71,6 @@ public class PedidoViewModel extends ViewModel {
         return productoActualizado;
     }
 
-    public LiveData<DetallesArchivoDTO> getDetallesArchivo(){
-        return detallesArchivo;
-    }
-
-    public LiveData<ArchivoDTO> getImagenProducto(){
-        return archivoProducto;
-    }
 
     public LiveData<BigDecimal> getSubtotalPedido(){
         return subtotalPedido;
@@ -112,6 +103,10 @@ public class PedidoViewModel extends ViewModel {
         totalPedido.postValue(total);
     }
 
+    public void limpiarMensaje() {
+        mensaje.postValue(null);
+    }
+
 
     //MÉTODOS API
     public void cargarPedidoActual(int idCliente){
@@ -121,10 +116,8 @@ public class PedidoViewModel extends ViewModel {
         pedidoService.obtenerPedidoActual(idCliente, result -> {
             try {
                 cargando.postValue(false);
-
                 if (result == null) {
                     pedidoActual.postValue(null);
-                    mensaje.postValue("ApiResult null");
                     return;
                 }
 
@@ -132,7 +125,6 @@ public class PedidoViewModel extends ViewModel {
                     if (result.datos == null){
                         pedidoActual.postValue(null);
                         mensaje.postValue("No se encontró pedido actual");
-                        crearPedido(idCliente);
                     } else {
                         PedidoDTO dto = result.datos;
                         Pedido p = new Pedido(dto.getId(), dto.getFechaCompra(), dto.getActual(),
@@ -154,41 +146,34 @@ public class PedidoViewModel extends ViewModel {
     public void crearPedido(int idCliente){
         cargando.setValue(true);
         mensaje.setValue(null);
-        Call<Void> callServicio = pedidoService.crearPedido(idCliente, new PedidoService.ResultCallback<Void>() {
-            @Override
-            public void onResult(ApiResult<Void> result) {
-                if (result.codigo == 201){
-                    cargando.postValue(false);
-                    mensaje.postValue(null);
-                }else{
-                    cargando.postValue(false);
-                    mensaje.postValue(result.mensaje);
-                }
+        pedidoService.crearPedido(idCliente, result -> {
+            cargando.postValue(false);
+            if (result.codigo == 201){
+                cargarPedidoActual(idCliente);
+            }else{
+                mensaje.postValue(result.mensaje);
             }
         });
     }
 
-    public void cancelarPedido(int idPedido){
+    public void cancelarPedido(int idPedido, int idCliente){
         cargando.setValue(true);
         mensaje.setValue(null);
-        Call<Void> callServicio = pedidoService.cancelarPedido(idPedido, new PedidoService.ResultCallback<Void>() {
-            @Override
-            public void onResult(ApiResult<Void> result) {
-               if (result.codigo == 200){
-                   cargando.postValue(false);
-                   //TODO: Crear Pedido con idCliente de app global
-               }else{
-                   cargando.postValue(false);
-                   mensaje.postValue(result.mensaje);
-               }
-            }
+        pedidoService.cancelarPedido(idPedido, result -> {
+            cargando.postValue(false);
+            if (result.codigo == 200){
+                pedidoActual.postValue(null);
+               crearPedido(idCliente);
+           }else{
+               mensaje.postValue(result.mensaje);
+           }
         });
     }
 
     public void consultarProductosPedido(int idPedido){
         cargando.setValue(true);
         mensaje.setValue(null);
-        Call<List<DetallesProductoDTO>> callServicio = productoPedidoService.consultarProductos(idPedido, new ProductoPedidoService.ResultCallBack<List<DetallesProductoDTO>>() {
+        productoPedidoService.consultarProductos(idPedido, new ProductoPedidoService.ResultCallBack<List<DetallesProductoDTO>>() {
             @Override
             public void onResult(ApiResult<List<DetallesProductoDTO>> result) {
                 if(result.codigo == 200){
@@ -275,86 +260,34 @@ public class PedidoViewModel extends ViewModel {
             }
         });
     }
-
-    public void obtenerRutaArchivo(int idProducto){
-        mensaje.setValue(null);
-        cargando.setValue(true);
-        Call<DetallesArchivoDTO> callServicio = archivoService.obtenerRutaArchivo(idProducto, new ArchivoService.ResultCallback<DetallesArchivoDTO>() {
-            @Override
-            public void onResult(ApiResult<DetallesArchivoDTO> result) {
-                if (result.codigo == 200){
-                    if (result.datos != null){
-                        cargando.postValue(false);
-                        detallesArchivo.postValue(result.datos);
-                    }else {
-                        cargando.postValue(false);
-                        detallesArchivo.postValue(null);
-                    }
-                }else{
-                    cargando.postValue(false);
-                    mensaje.postValue(result.mensaje);
-                }
-            }
-        });
-    }
-
-    public void obtenerArchivo(String ruta){
-        cargando.setValue(true);
-        mensaje.setValue(null);
-        if (ruta == null){
-            cargando.postValue(false);
-            mensaje.postValue("Ruta vacía");
-            return;
-        }
-
-        try{
-           int idArchivo = extraerIdArchivo(ruta);
-           Call<ArchivoDTO> callServicio = archivoService.obtenerImagen(idArchivo, new ArchivoService.ResultCallback<ArchivoDTO>() {
-               @Override
-               public void onResult(ApiResult<ArchivoDTO> result) {
-                   if (result.codigo == 200){
-                       if (result.datos != null){
-                           cargando.postValue(false);
-                           archivoProducto.postValue(result.datos);
-                       } else {
-                         cargando.postValue(false);
-                         archivoProducto.postValue(null);
-                       }
-                   }else{
-                       cargando.postValue(false);
-                       mensaje.postValue(result.mensaje);
-                   }
-               }
-           });
-        }catch (IllegalArgumentException iae){
-            cargando.postValue(false);
-            mensaje.postValue(iae.getMessage());
-        }
-
-    }
-
     public static int extraerIdArchivo(String ruta) {
         if (ruta == null) throw new IllegalArgumentException("ruta null");
 
-        String idArchivo = ruta;
+        String s = ruta.trim();
 
-        int idxSlash = idArchivo.lastIndexOf('/');
-        if (idxSlash >= 0) idArchivo = idArchivo.substring(idxSlash + 1);
+        int q = s.indexOf('?');
+        if (q >= 0) s = s.substring(0, q);
 
-        int idxBackslash = idArchivo.lastIndexOf('\\');
-        if (idxBackslash >= 0) idArchivo = idArchivo.substring(idxBackslash + 1);
+        int h = s.indexOf('#');
+        if (h >= 0) s = s.substring(0, h);
 
-        idArchivo = idArchivo.trim();
+        int slash = Math.max(s.lastIndexOf('/'), s.lastIndexOf('\\'));
+        if (slash >= 0) s = s.substring(slash + 1);
 
-        if (idArchivo.isEmpty())
-            throw new IllegalArgumentException("No se pudo extraer idArchivo de: " + ruta);
+        s = s.trim();
 
-        try {
-            return Integer.parseInt(idArchivo);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("El idArchivo no es numérico: '" + idArchivo + "' (ruta: " + ruta + ")", e);
-        }
+        int dot = s.indexOf('.');
+        if (dot > 0) s = s.substring(0, dot);
+
+        s = s.trim();
+        if (s.isEmpty()) throw new IllegalArgumentException("No se pudo extraer idArchivo de: " + ruta);
+
+        s = s.replaceAll("[^0-9]", "");
+        if (s.isEmpty()) throw new IllegalArgumentException("El idArchivo no es numérico: " + ruta);
+
+        return Integer.parseInt(s);
     }
+
 
     public interface ImagenCallback {
         void onOk(int idProducto, ArchivoDTO archivo);
@@ -362,11 +295,31 @@ public class PedidoViewModel extends ViewModel {
     }
 
     public void cargarImagenProducto(int idProducto, ImagenCallback cb) {
-       obtenerRutaArchivo(idProducto);
-       DetallesArchivoDTO detallesImagen = getDetallesArchivo().getValue();
-       obtenerArchivo(detallesImagen.getRuta());
+
+        archivoService.obtenerRutaArchivo(idProducto, resRuta -> {
+            if (resRuta.codigo != 200 || resRuta.datos == null || resRuta.datos.getRuta() == null) {
+                cb.onError(idProducto, resRuta.mensaje != null ? resRuta.mensaje : "No se obtuvo ruta");
+                return;
+            }
+
+            String ruta = resRuta.datos.getRuta();
+
+            int idArchivo;
+            try {
+                idArchivo = extraerIdArchivo(ruta);
+            } catch (IllegalArgumentException e) {
+                cb.onError(idProducto, e.getMessage());
+                return;
+            }
+
+            archivoService.obtenerImagen(idArchivo, resImg -> {
+                if (resImg.codigo == 200 && resImg.datos != null && resImg.datos.getDatos() != null
+                        && !resImg.datos.getDatos().isEmpty()) {
+                    cb.onOk(idProducto, resImg.datos);
+                } else {
+                    cb.onError(idProducto, resImg.mensaje != null ? resImg.mensaje : "Imagen vacía");
+                }
+            });
+        });
     }
-
-
-
 }

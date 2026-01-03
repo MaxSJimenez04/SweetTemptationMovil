@@ -59,7 +59,7 @@ public class PedidoService {
            public void onFailure(Call<PedidoDTO> call, Throwable t) {
                String msg = t.getMessage();
                if (msg == null || msg.isBlank()) msg = t.getClass().getSimpleName();
-               cb.onResult(ApiResult.fallo(503, msg));
+               cb.onResult(ApiResult.fallo(503, Constantes.MENSAJE_SIN_CONEXION));
            }
        });
        return  call;

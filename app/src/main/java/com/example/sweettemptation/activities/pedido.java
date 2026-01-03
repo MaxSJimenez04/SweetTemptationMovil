@@ -1,11 +1,19 @@
 package com.example.sweettemptation.activities;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -13,16 +21,21 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.sweettemptation.R;
 import com.example.sweettemptation.dto.ArchivoDTO;
+import com.example.sweettemptation.dto.DetallesArchivoDTO;
+import com.example.sweettemptation.dto.DetallesProductoDTO;
 import com.example.sweettemptation.model.Pedido;
 import com.example.sweettemptation.utils.Constantes;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class pedido extends Fragment {
 
@@ -62,6 +75,7 @@ public class pedido extends Fragment {
         View btnEditar = view.findViewById(R.id.btnEditar);
         View btnGuardarCambios = view.findViewById(R.id.btnGuardarCambios);
         View btnProductos = view.findViewById(R.id.btnProductos);
+        ImageView imgProducto = view.findViewById(R.id.imgProducto);
         View txtSinProducto = view.findViewById(R.id.txtSinProductos);
 
         // Inicializa ViewModel
@@ -75,103 +89,134 @@ public class pedido extends Fragment {
         mViewModel.getMensaje().observe(getViewLifecycleOwner(), msg -> {
             if (msg != null && !msg.isBlank()) {
                 Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
+                mViewModel.limpiarMensaje();
             }
         });
+
+
         mViewModel.cargarPedidoActual(idCliente);
+
+//        SharedPreferences prefs = Objects.requireNonNull(getContext()).getSharedPreferences("user_prefs", MODE_PRIVATE);
+//        idCliente = prefs.getInt("user_id", 3);
+
+        adapter = new DetallesProductoAdapter(
+                item -> {
+                    Pedido p = mViewModel.getPedidoActual().getValue();
+                    if (p != null) mViewModel.eliminarProducto(p.getId(), item.getId());
+                },
+                (item, nuevaCantidad) -> {
+                    Pedido p = mViewModel.getPedidoActual().getValue();
+                    if (p != null) {
+                        item.setCantidad(nuevaCantidad);
+                        mViewModel.actualizarProducto(p.getId(), item);
+                    }
+                }
+        );
+        recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recycler.setAdapter(adapter);
 
         mViewModel.getPedidoActual().observe(getViewLifecycleOwner(), pedido -> {
             if (pedido == null) {
+                adapter.submitList(Collections.emptyList());
+                tvSubtotal.setText("Subtotal: $0");
+                tvTotal.setText("Total: $0");
+                txtSinProducto.setVisibility(View.VISIBLE);
+                btnProductos.setVisibility(View.VISIBLE);
+                recycler.setVisibility(View.GONE);
                 return;
             }
 
             pedidoActual = pedido;
 
             mViewModel.consultarProductosPedido(pedidoActual.getId());
+        });
 
-            mViewModel.getSubtotalPedido().observe(getViewLifecycleOwner(), sub -> {
-                tvSubtotal.setText("Subtotal: $" + sub);
-            });
+        mViewModel.getSubtotalPedido().observe(getViewLifecycleOwner(), sub -> {
+            tvSubtotal.setText("Subtotal: $" + sub);
+        });
 
-            mViewModel.getTotalPedido().observe(getViewLifecycleOwner(), tot -> {
-                tvTotal.setText("Total: $" + tot);
-            });
+        mViewModel.getTotalPedido().observe(getViewLifecycleOwner(), tot -> {
+            tvTotal.setText("Total: $" + tot);
+        });
 
-            tvIva.setText("IVA: " + Constantes.IVA + "%");
+        tvIva.setText("IVA: " + Constantes.IVA + "%");
 
+        btnEditar.setOnClickListener(v -> {
+            btnGuardarCambios.setVisibility(View.VISIBLE);
+            btnEditar.setVisibility(View.INVISIBLE);
+            adapter.setModoEdicion(true);
+        });
+        btnGuardarCambios.setOnClickListener(v -> {
+            adapter.setModoEdicion(false);
+            mViewModel.recalcularTotal(pedidoActual.getId());
+            btnGuardarCambios.setVisibility(View.GONE);
+            btnEditar.setVisibility(View.VISIBLE);
+        });
+        btnProductos.setOnClickListener(v -> {
+            //TODO: navegar a página productos
+        });
 
-            adapter = new DetallesProductoAdapter(
-                    item -> {
-                        Pedido p = mViewModel.getPedidoActual().getValue();
-                        if (p != null) mViewModel.eliminarProducto(p.getId(), item.getId());
-                    },
-                    (item, nuevaCantidad) -> {
-                        Pedido p = mViewModel.getPedidoActual().getValue();
-                        if (p != null) {
-                            item.setCantidad(nuevaCantidad);
-                            mViewModel.actualizarProducto(p.getId(), item);
+        // Eventos UI
+        btnCancelar.setOnClickListener(v -> {
+            mViewModel.cancelarPedido(pedidoActual.getId(), idCliente);
+        });
+
+        btnPagar.setOnClickListener(v -> {
+            // Navegación la decide el Fragment/Activity (UI)
+            // Ejemplo (Navigation Component):
+            // NavHostFragment.findNavController(this).navigate(R.id.action_pedido_to_tipoPago);
+        });
+
+        mViewModel.getProductosPedido().observe(getViewLifecycleOwner(), lista -> {
+            if (!lista.isEmpty()) {
+                btnProductos.setVisibility(View.GONE);
+                txtSinProducto.setVisibility(View.GONE);
+                recycler.setVisibility(View.VISIBLE);
+                adapter.submitList(lista);
+                for (DetallesProductoDTO item : lista) {
+                    mViewModel.cargarImagenProducto(item.getIdProducto(), new PedidoViewModel.ImagenCallback() {
+                        @Override
+                        public void onOk(int idProducto, ArchivoDTO archivo) {
+                            Bitmap bmp = convertirArchivoABitmap(archivo);
+                            if (bmp == null)
+                                return;
+
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                adapter.setImagenProducto(idProducto, bmp);
+                            });
                         }
-                    },
-                    idProducto -> {
-                        mViewModel.cargarImagenProducto(idProducto, new PedidoViewModel.ImagenCallback() {
-                            @Override
-                            public void onOk(int idProd, ArchivoDTO archivo) {
-                                Bitmap bmp = convertirArchivoABitmap(archivo);
-                                if (bmp != null) adapter.setImagenProducto(idProd, bmp);
-                            }
 
-                            @Override
-                            public void onError(int idProd, String mensaje) {
-                                Toast.makeText(requireContext(), mensaje, Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-            );
-
-            recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
-            recycler.setAdapter(adapter);
-
-            mViewModel.getProductosPedido().observe(getViewLifecycleOwner(), lista -> {
-                if (lista != null) {
-                    adapter.submitList(lista);
-                    mViewModel.calcularTotal();
-                } else {
-                    btnProductos.setVisibility(View.VISIBLE);
-                    txtSinProducto.setVisibility(View.VISIBLE);
+                        @Override
+                        public void onError(int idProducto, String mensaje) {
+                            Bitmap phBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ph_imagenproducto);
+                            new Handler(Looper.getMainLooper()).post(() ->{
+                                adapter.setImagenProducto(idProducto, phBitmap);
+                            });
+                        }
+                    });
                 }
-            });
-
-            btnEditar.setOnClickListener(v -> {
-                btnGuardarCambios.setVisibility(View.VISIBLE);
-                adapter.setModoEdicion(true);
-            });
-            btnGuardarCambios.setOnClickListener(v -> {
-                adapter.setModoEdicion(false);
-                btnGuardarCambios.setVisibility(View.GONE);
-            });
-            btnProductos.setOnClickListener(v -> {
-                //TODO: navegar a página productos
-            });
-
-            // Eventos UI
-            btnCancelar.setOnClickListener(v -> mViewModel.cancelarPedido(pedidoActual.getId()));
-
-            btnPagar.setOnClickListener(v -> {
-                // Navegación la decide el Fragment/Activity (UI)
-                // Ejemplo (Navigation Component):
-                // NavHostFragment.findNavController(this).navigate(R.id.action_pedido_to_tipoPago);
-            });
+                mViewModel.calcularTotal();
+            } else {
+                btnProductos.setVisibility(View.VISIBLE);
+                txtSinProducto.setVisibility(View.VISIBLE);
+                recycler.setVisibility(View.GONE);
+            }
         });
     }
 
-    private Bitmap convertirArchivoABitmap (ArchivoDTO archivo){
-        if (archivo == null) return null;
+    private Bitmap convertirArchivoABitmap(ArchivoDTO archivo) {
+        if (archivo == null || archivo.getDatos() == null || archivo.getDatos().isEmpty()) {
+            return null;
+        }
 
-        byte[] bytes = archivo.getDatos();
-        if (bytes == null || bytes.length == 0) return null;
+        try {
+            byte[] bytes = Base64.decode(archivo.getDatos(), Base64.DEFAULT);
 
-        BitmapFactory.Options opt = new BitmapFactory.Options();
-        opt.inPreferredConfig = Bitmap.Config.RGB_565; // menos memoria que ARGB_8888
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length, opt);
+
+            return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }

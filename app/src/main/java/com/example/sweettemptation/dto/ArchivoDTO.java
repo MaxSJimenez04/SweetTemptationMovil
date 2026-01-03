@@ -6,12 +6,12 @@ public class ArchivoDTO {
     private int id;
     private LocalDateTime fechaRegistro;
     private String extension;
-    private byte[] datos;
+    private String datos;
 
     public ArchivoDTO() {
     }
 
-    public ArchivoDTO(int id, LocalDateTime fechaRegistro, String extension, byte[] datos) {
+    public ArchivoDTO(int id, LocalDateTime fechaRegistro, String extension, String datos) {
         this.id = id;
         this.fechaRegistro = fechaRegistro;
         this.extension = extension;
@@ -42,11 +42,11 @@ public class ArchivoDTO {
         this.extension = extension;
     }
 
-    public byte[] getDatos() {
+    public String getDatos() {
         return datos;
     }
 
-    public void setDatos(byte[] datos) {
+    public void setDatos(String datos) {
         this.datos = datos;
     }
 }
