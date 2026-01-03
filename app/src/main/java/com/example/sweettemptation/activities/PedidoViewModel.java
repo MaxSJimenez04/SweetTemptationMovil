@@ -103,6 +103,10 @@ public class PedidoViewModel extends ViewModel {
         totalPedido.postValue(total);
     }
 
+    public void limpiarMensaje() {
+        mensaje.postValue(null);
+    }
+
 
     //MÉTODOS API
     public void cargarPedidoActual(int idCliente){
@@ -112,10 +116,8 @@ public class PedidoViewModel extends ViewModel {
         pedidoService.obtenerPedidoActual(idCliente, result -> {
             try {
                 cargando.postValue(false);
-
                 if (result == null) {
                     pedidoActual.postValue(null);
-                    mensaje.postValue("ApiResult null");
                     return;
                 }
 
@@ -123,7 +125,6 @@ public class PedidoViewModel extends ViewModel {
                     if (result.datos == null){
                         pedidoActual.postValue(null);
                         mensaje.postValue("No se encontró pedido actual");
-                        crearPedido(idCliente);
                     } else {
                         PedidoDTO dto = result.datos;
                         Pedido p = new Pedido(dto.getId(), dto.getFechaCompra(), dto.getActual(),
@@ -146,25 +147,24 @@ public class PedidoViewModel extends ViewModel {
         cargando.setValue(true);
         mensaje.setValue(null);
         pedidoService.crearPedido(idCliente, result -> {
+            cargando.postValue(false);
             if (result.codigo == 201){
-                cargando.postValue(false);
-                mensaje.postValue(null);
+                cargarPedidoActual(idCliente);
             }else{
-                cargando.postValue(false);
                 mensaje.postValue(result.mensaje);
             }
         });
     }
 
-    public void cancelarPedido(int idPedido){
+    public void cancelarPedido(int idPedido, int idCliente){
         cargando.setValue(true);
         mensaje.setValue(null);
         pedidoService.cancelarPedido(idPedido, result -> {
-           if (result.codigo == 200){
-               cargando.postValue(false);
-               //TODO: Crear Pedido con idCliente de app global
+            cargando.postValue(false);
+            if (result.codigo == 200){
+                pedidoActual.postValue(null);
+               crearPedido(idCliente);
            }else{
-               cargando.postValue(false);
                mensaje.postValue(result.mensaje);
            }
         });
@@ -173,7 +173,7 @@ public class PedidoViewModel extends ViewModel {
     public void consultarProductosPedido(int idPedido){
         cargando.setValue(true);
         mensaje.setValue(null);
-        Call<List<DetallesProductoDTO>> callServicio = productoPedidoService.consultarProductos(idPedido, new ProductoPedidoService.ResultCallBack<List<DetallesProductoDTO>>() {
+        productoPedidoService.consultarProductos(idPedido, new ProductoPedidoService.ResultCallBack<List<DetallesProductoDTO>>() {
             @Override
             public void onResult(ApiResult<List<DetallesProductoDTO>> result) {
                 if(result.codigo == 200){
