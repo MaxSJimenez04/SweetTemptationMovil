@@ -3,9 +3,14 @@ package com.example.sweettemptation.activities;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +25,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.sweettemptation.R;
 import com.example.sweettemptation.dto.ArchivoDTO;
+import com.example.sweettemptation.dto.DetallesArchivoDTO;
+import com.example.sweettemptation.dto.DetallesProductoDTO;
 import com.example.sweettemptation.model.Pedido;
 import com.example.sweettemptation.utils.Constantes;
 
@@ -63,6 +70,7 @@ public class pedido extends Fragment {
         View btnEditar = view.findViewById(R.id.btnEditar);
         View btnGuardarCambios = view.findViewById(R.id.btnGuardarCambios);
         View btnProductos = view.findViewById(R.id.btnProductos);
+        ImageView imgProducto = view.findViewById(R.id.imgProducto);
         View txtSinProducto = view.findViewById(R.id.txtSinProductos);
 
         // Inicializa ViewModel
@@ -111,20 +119,6 @@ public class pedido extends Fragment {
                             item.setCantidad(nuevaCantidad);
                             mViewModel.actualizarProducto(p.getId(), item);
                         }
-                    },
-                    idProducto -> {
-                        mViewModel.cargarImagenProducto(idProducto, new PedidoViewModel.ImagenCallback() {
-                            @Override
-                            public void onOk(int idProd, ArchivoDTO archivo) {
-                                Bitmap bmp = convertirArchivoABitmap(archivo);
-                                if (bmp != null) adapter.setImagenProducto(idProd, bmp);
-                            }
-
-                            @Override
-                            public void onError(int idProd, String mensaje) {
-                                Toast.makeText(requireContext(), mensaje, Toast.LENGTH_LONG).show();
-                            }
-                        });
                     }
             );
 
@@ -134,6 +128,28 @@ public class pedido extends Fragment {
             mViewModel.getProductosPedido().observe(getViewLifecycleOwner(), lista -> {
                 if (lista != null) {
                     adapter.submitList(lista);
+                        for (DetallesProductoDTO item : lista) {
+                            mViewModel.cargarImagenProducto(item.getIdProducto(), new PedidoViewModel.ImagenCallback() {
+                                @Override
+                                public void onOk(int idProducto, ArchivoDTO archivo) {
+                                    Bitmap bmp = convertirArchivoABitmap(archivo);
+                                    if (bmp == null)
+                                        return;
+
+                                    new Handler(Looper.getMainLooper()).post(() -> {
+                                        adapter.setImagenProducto(idProducto, bmp);
+                                    });
+                                }
+
+                                @Override
+                                public void onError(int idProducto, String mensaje) {
+                                    Bitmap phBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ph_imagenproducto);
+                                    new Handler(Looper.getMainLooper()).post(() ->{
+                                        adapter.setImagenProducto(idProducto, phBitmap);
+                                    });
+                                }
+                            });
+                        }
                     mViewModel.calcularTotal();
                 } else {
                     btnProductos.setVisibility(View.VISIBLE);
@@ -167,15 +183,22 @@ public class pedido extends Fragment {
         });
     }
 
-    private Bitmap convertirArchivoABitmap (ArchivoDTO archivo){
-        if (archivo == null) return null;
+    private Bitmap convertirArchivoABitmap(ArchivoDTO archivo) {
+        if (archivo == null || archivo.getDatos() == null || archivo.getDatos().isEmpty()) {
+            Log.e("IMG", "Datos nulos o vacíos");
+            return null;
+        }
 
-        byte[] bytes = archivo.getDatos();
-        if (bytes == null || bytes.length == 0) return null;
+        try {
+            byte[] bytes = Base64.decode(archivo.getDatos(), Base64.DEFAULT);
 
-        BitmapFactory.Options opt = new BitmapFactory.Options();
-        opt.inPreferredConfig = Bitmap.Config.RGB_565; // menos memoria que ARGB_8888
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length, opt);
+            Log.d("IMG", "Bytes length = " + bytes.length);
+
+            return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        } catch (Exception e) {
+            Log.e("IMG", "Error decodificando imagen", e);
+            return null;
+        }
     }
 
 }

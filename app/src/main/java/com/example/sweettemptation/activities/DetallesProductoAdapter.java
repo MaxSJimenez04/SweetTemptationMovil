@@ -33,26 +33,20 @@ public class DetallesProductoAdapter extends ListAdapter<DetallesProductoDTO, De
         void onCantidadCambiada(DetallesProductoDTO item, int nuevaCantidad);
     }
 
-    public interface OnSolicitarImagen{
-        void onSolcitarImagen(int idProducto);
-    }
 
     private final OnEliminarClick onEliminarClick;
     private final OnCantidadCambiada onCantidadCambiada;
 
-    private final OnSolicitarImagen onSolicitarImagen;
 
     private boolean modoEdicion = false;
 
     private final SparseArrayCompat<Bitmap> imagenCache = new SparseArrayCompat<>();
     private final Set<Integer> imagenSolicitada = new HashSet<>();
 
-    public DetallesProductoAdapter(OnEliminarClick onEliminarClick, OnCantidadCambiada onCantidadCambiada,
-                                   OnSolicitarImagen onSolicitarImagen) {
+    public DetallesProductoAdapter(OnEliminarClick onEliminarClick, OnCantidadCambiada onCantidadCambiada) {
         super(DIFF);
         this.onEliminarClick = onEliminarClick;
         this.onCantidadCambiada = onCantidadCambiada;
-        this.onSolicitarImagen = onSolicitarImagen;
     }
 
     public void setModoEdicion(boolean enabled) {
@@ -77,11 +71,16 @@ public class DetallesProductoAdapter extends ListAdapter<DetallesProductoDTO, De
         h.tvCantidad.setText("Cantidad: " + item.getCantidad());
         h.tvNumero.setText(String.valueOf(item.getCantidad()));
 
-
         h.btnEliminar.setVisibility(modoEdicion ? View.VISIBLE : View.GONE);
         h.spSpinner.setVisibility(modoEdicion ? View.VISIBLE : View.GONE);
         h.tvCantidad.setVisibility(modoEdicion ? View.GONE : View.VISIBLE);
 
+        Bitmap imagenProducto = imagenCache.get(item.getIdProducto());
+        if (imagenProducto != null) {
+            h.imgProducto.setImageBitmap(imagenProducto);
+        } else {
+            h.imgProducto.setImageResource(R.drawable.ph_imagenproducto);
+        }
         h.btnEliminar.setOnClickListener(v -> {
             if (onEliminarClick != null) onEliminarClick.onEliminar(item);
         });
@@ -137,7 +136,8 @@ public class DetallesProductoAdapter extends ListAdapter<DetallesProductoDTO, De
                 public boolean areContentsTheSame(@NonNull DetallesProductoDTO oldItem, @NonNull DetallesProductoDTO newItem) {
                     return oldItem.getCantidad() == newItem.getCantidad()
                             && safeEquals(oldItem.getNombre(), newItem.getNombre())
-                            && safeEquals(oldItem.getPrecio(), newItem.getPrecio());
+                            && safeEquals(oldItem.getPrecio(), newItem.getPrecio())
+                            && safeEquals(oldItem.getIdProducto(), newItem.getIdProducto());
                 }
 
                 private boolean safeEquals(Object a, Object b) {
@@ -149,7 +149,6 @@ public class DetallesProductoAdapter extends ListAdapter<DetallesProductoDTO, De
         if (bitmap == null) return;
 
         imagenCache.put(idProducto, bitmap);
-
         for (int i = 0; i < getItemCount(); i++) {
             DetallesProductoDTO it = getItem(i);
             if (it != null && it.getIdProducto() == idProducto) {
