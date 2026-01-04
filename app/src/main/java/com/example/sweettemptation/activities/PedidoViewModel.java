@@ -1,17 +1,16 @@
 package com.example.sweettemptation.activities;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.Context;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.sweettemptation.dto.ArchivoDTO;
-import com.example.sweettemptation.dto.DetallesArchivoDTO;
 import com.example.sweettemptation.dto.DetallesProductoDTO;
 import com.example.sweettemptation.dto.PedidoDTO;
 import com.example.sweettemptation.dto.ProductoPedidoDTO;
+import com.example.sweettemptation.grpc.TicketRepository;
 import com.example.sweettemptation.interfaces.ApiResult;
 import com.example.sweettemptation.interfaces.ArchivoApi;
 import com.example.sweettemptation.interfaces.PedidoApi;
@@ -27,6 +26,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
+import io.grpc.Uri;
 import retrofit2.Call;
 
 public class PedidoViewModel extends ViewModel {
@@ -38,9 +38,12 @@ public class PedidoViewModel extends ViewModel {
     public final MutableLiveData<BigDecimal> subtotalPedido = new MutableLiveData<>(BigDecimal.ZERO);
     public final MutableLiveData<BigDecimal> totalPedido = new MutableLiveData<>(BigDecimal.ZERO);
 
+    public final MutableLiveData<android.net.Uri> ticketDescargado = new MutableLiveData<android.net.Uri>(null);
+
     private final PedidoService pedidoService;
     private final ProductoPedidoService productoPedidoService;
     private final ArchivoService archivoService;
+    private final TicketRepository ticketRepository = new TicketRepository();
 
     public PedidoViewModel(){
         PedidoApi pedidoApi = ApiCliente.getInstance().retrofit().create(PedidoApi.class);
@@ -49,6 +52,11 @@ public class PedidoViewModel extends ViewModel {
         this.productoPedidoService = new ProductoPedidoService(productoPedidoApi);
         ArchivoApi archivoApi = ApiCliente.getInstance().retrofit().create(ArchivoApi.class);
         this.archivoService = new ArchivoService(archivoApi);
+    }
+
+    public void init(Context context){
+        ticketRepository.init(context);
+
     }
 
     public LiveData<Pedido> getPedidoActual(){
@@ -322,4 +330,37 @@ public class PedidoViewModel extends ViewModel {
             });
         });
     }
+
+    public void descargarTicket(int idPedido) {
+        cargando.postValue(true);
+        mensaje.postValue(null);
+
+        ticketRepository.descargarTicket(idPedido,
+                new TicketRepository.Callback() {
+                    @Override
+                    public void onSuccess(android.net.Uri uri) {
+                        cargando.postValue(false);
+                        ticketDescargado.postValue(uri);
+                        mensaje.postValue("Ticket guardado en Descargas");
+                    }
+
+                    @Override
+                    public void onSuccess(Uri uri) {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable error) {
+                        cargando.postValue(false);
+                        mensaje.postValue(error.getMessage());
+                    }
+                });
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        ticketRepository.close();
+    }
+
 }
