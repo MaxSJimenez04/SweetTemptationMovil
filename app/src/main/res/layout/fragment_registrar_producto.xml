@@ -176,5 +176,14 @@
             app:cornerRadius="30dp"
             android:textColor="#FFFFFF" />
 
+        // para mostrar una barra de carga
+        <ProgressBar
+            android:id="@+id/progressCircular"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:indeterminateTint="#FF5A8F"
+            android:visibility="gone" />
     </LinearLayout>
 </ScrollView>

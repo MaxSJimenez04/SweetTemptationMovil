@@ -12,8 +12,6 @@ public class ArchivoDTO implements Serializable {
 
     public ArchivoDTO() {
     }
-
-
     public ArchivoDTO(int id, String fechaRegistro, String extension, String datos) {
         this.id = id;
         this.fechaRegistro = fechaRegistro;
@@ -52,5 +50,13 @@ public class ArchivoDTO implements Serializable {
 
     public void setDatos(String datos) {
         this.datos = datos;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getIdProducto() {
+        return idProducto;
     }
 }

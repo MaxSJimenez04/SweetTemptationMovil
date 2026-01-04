@@ -15,22 +15,32 @@ public interface ProductoApi {
     @GET("producto/{id}")
     Call<ProductoDTO> getProducto(@Path("id") int id);
 
-    // MODIFICADO: Ahora soporta imagen al crear
+    /**
+     * Registro de producto EXCLUSIVO para móvil.
+     * Apuntamos a 'nuevo-movil' que es el método Multipart que agregamos al servidor.
+     */
     @Multipart
-    @POST("producto/nuevo")
-    Call<Integer> crearProducto(
-            @Part("producto") RequestBody productoJson, // Los datos del pastel en JSON
-            @Part MultipartBody.Part imagen            // El archivo de la foto
-    );
-
-    @Multipart
-    @PUT("producto/{id}")
-    Call<ProductoDTO> actualizarProducto(
-            @Path("id") int id,
-            @Part("producto") RequestBody productoJson,
+    @POST("producto/nuevo-movil") // <-- Cambiado para usar el nuevo endpoint
+    Call<Void> crearProducto(
+            @Part("producto") RequestBody producto,
             @Part MultipartBody.Part imagen
     );
 
+    /**
+     * Actualización de producto.
+     */
+    @Multipart
+    @PUT("producto/{id}")
+    Call<Void> actualizarProducto(
+            @Path("id") int id,
+            @Part("producto") RequestBody producto,
+            @Part MultipartBody.Part imagen
+    );
+
+    /**
+     * Eliminación de producto.
+     * Call<String> para recibir el mensaje de confirmación del servidor.
+     */
     @DELETE("producto/{id}")
     Call<String> eliminarProducto(@Path("id") int id);
 }

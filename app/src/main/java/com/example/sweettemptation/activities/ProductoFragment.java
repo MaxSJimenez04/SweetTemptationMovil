@@ -124,17 +124,19 @@ public class ProductoFragment extends Fragment {
 
     // Método optimizado para convertir bytes a imagen
     private Bitmap convertirArchivoABitmap(ArchivoDTO archivo) {
+        if (archivo == null || archivo.getDatos() == null) {
+            Log.e(TAG, "Error: Datos de archivo nulos.");
+            return null;
+        }
+
         try {
-            byte[] bytes = archivo.getDatos();
-            if (bytes == null || bytes.length == 0) return null;
+            // 1. Convertimos el String Base64 a un arreglo de bytes reales
+            byte[] imageBytes = android.util.Base64.decode(archivo.getDatos(), android.util.Base64.DEFAULT);
 
-            // BitmapFactory.Options ayuda a prevenir errores de memoria (OutOMemory)
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inPreferredConfig = Bitmap.Config.RGB_565;
-
-            return BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+            // 2. Creamos el Bitmap a partir de esos bytes
+            return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
         } catch (Exception e) {
-            Log.e(TAG, "Error al decodificar imagen: " + e.getMessage());
+            Log.e(TAG, "Error al decodificar la imagen: " + e.getMessage());
             return null;
         }
     }

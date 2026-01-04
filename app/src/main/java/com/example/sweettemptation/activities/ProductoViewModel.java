@@ -74,17 +74,20 @@ public class ProductoViewModel extends ViewModel {
         });
     }
 
-    // MÉTODO CORREGIDO: Llama al nuevo método Multipart del Servicio
+    /**
+     * MÉTODO CORREGIDO: Ahora recibe Uri y Context para soportar Multipart.
+     * De esta forma no necesitas modificar tu API de Spring Boot.
+     */
     public void guardarProductoConImagen(ProductoDTO producto, Uri uri, Context context) {
         cargando.setValue(true);
         mensaje.setValue(null);
 
-        // Asegúrate de que el servicio también reciba los parámetros correctos
+        // Llamamos al servicio pasando los 3 parámetros necesarios para Multipart
         productoService.crearProducto(producto, uri, context, result -> {
             cargando.postValue(false);
             if (result.codigo == 200 || result.codigo == 201) {
                 mensaje.postValue("¡Producto registrado exitosamente!");
-                cargarProductos(); // Refrescamos la lista
+                cargarProductos(); // Refrescamos la lista automáticamente
             } else {
                 mensaje.postValue(result.mensaje);
             }
@@ -95,22 +98,20 @@ public class ProductoViewModel extends ViewModel {
         cargando.setValue(true);
         productoService.eliminarProducto(idProducto, result -> {
             cargando.postValue(false);
-            if (result.codigo == 200) {
-                mensaje.postValue("Producto eliminado");
-                cargarProductos();
+            if (result.codigo == 200 || result.codigo == 204) {
+                mensaje.postValue("Producto eliminado correctamente");
+                cargarProductos(); // Actualiza la lista al instante
             } else {
                 mensaje.postValue(result.mensaje);
             }
         });
     }
 
-    // --- LÓGICA DE CARGA DE IMÁGENES ---
+    // --- LÓGICA DE CARGA DE IMÁGENES (PARA LA LISTA) ---
 
     public void obtenerRutaArchivo(int idProducto) {
-        // 1. Pedimos los detalles (donde viene el ID del archivo)
         archivoService.obtenerDetallesArchivo(idProducto, result -> {
             if (result.codigo == 200 && result.datos != null) {
-                // 2. Usamos el ID que viene directamente en DetallesArchivoDTO
                 int idArchivoReal = result.datos.getId();
                 descargarImagenReal(idArchivoReal, idProducto);
             }
@@ -120,29 +121,15 @@ public class ProductoViewModel extends ViewModel {
     private void descargarImagenReal(int idArchivo, int idProducto) {
         archivoService.obtenerImagen(idArchivo, result -> {
             if (result.codigo == 200 && result.datos != null) {
-                byte[] datos = result.datos.getDatos();
-                if (datos != null) {
-                    // ESTA LÍNEA ES CLAVE PARA PROBAR:
-                    android.util.Log.d("IMAGEN_TEST", "Bytes recibidos: " + datos.length + " para prod: " + idProducto);
+                // Obtenemos el String Base64 (JPG en texto)
+                String datosBase64 = result.datos.getDatos();
 
+                if (datosBase64 != null) {
+                    android.util.Log.d("IMAGEN_TEST", "Imagen cargada para producto: " + idProducto);
                     result.datos.setIdProducto(idProducto);
                     archivoProducto.postValue(result.datos);
                 }
-            } else {
-                android.util.Log.e("IMAGEN_TEST", "Error al bajar imagen: " + result.mensaje);
             }
         });
-    }
-
-    // Método auxiliar robusto
-    private int extraerIdDesdeRuta(String ruta) {
-        try {
-            // Ejemplo: "uploads/productos/pastel_5.jpg" -> extrae 5
-            String nombre = ruta.substring(ruta.lastIndexOf("/") + 1);
-            String limpia = nombre.replaceAll("[^0-9]", "");
-            return Integer.parseInt(limpia);
-        } catch (Exception e) {
-            return -1;
-        }
     }
 }
