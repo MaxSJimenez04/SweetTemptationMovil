@@ -8,7 +8,6 @@ import java.io.OutputStream;
 
 public class FileUtils {
     public static File getFileFromUri(Context context, Uri uri) throws Exception {
-        // Creamos un archivo temporal en la memoria de la app
         File tempFile = File.createTempFile("upload", ".jpg", context.getCacheDir());
 
         try (InputStream is = context.getContentResolver().openInputStream(uri);

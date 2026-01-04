@@ -29,7 +29,6 @@ public class CategoriaService {
                     cb.onResult(ApiResult.exito(response.body(), response.code()));
                 } else {
                     int codigo = response.code();
-                    // Usamos la validación de errores que usa tu equipo
                     String mensaje = ValidacionesRespuesta.leerErrorBody(response.errorBody());
                     cb.onResult(ApiResult.fallo(codigo, mensaje != null ? mensaje : "Error al cargar categorías"));
                 }
@@ -37,7 +36,6 @@ public class CategoriaService {
 
             @Override
             public void onFailure(Call<List<CategoriaDTO>> call, Throwable t) {
-                // Manejo de desconexión estándar
                 if (ValidacionesRespuesta.esDesconexion(t)) {
                     cb.onResult(ApiResult.fallo(503, Constantes.MENSAJE_SIN_CONEXION));
                 } else {

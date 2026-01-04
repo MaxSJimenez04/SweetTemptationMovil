@@ -1,22 +1,23 @@
 package com.example.sweettemptation.dto;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-public class ProductoDTO {
+public class ProductoDTO implements Serializable{
+    private static final long serialVersionUID = 1L;
     private int id;
     private String nombre;
     private String descripcion;
     private BigDecimal precio;
     private boolean disponible;
     private int unidades;
-    private String fechaRegistro; // Cambiado a String para facilitar el mapeo
-    private String fechaModificacion; // Cambiado a String para facilitar el mapeo
+    private String fechaRegistro;
+    private String fechaModificacion;
     private int categoria;
 
     public ProductoDTO() {
     }
 
-    // Constructor útil para cuando creas un producto nuevo desde el celular
     public ProductoDTO(String nombre, String descripcion, BigDecimal precio,
                        boolean disponible, int unidades, int categoria) {
         this.nombre = nombre;
@@ -27,7 +28,6 @@ public class ProductoDTO {
         this.categoria = categoria;
     }
 
-    // Getters y Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

@@ -15,20 +15,14 @@ public interface ProductoApi {
     @GET("producto/{id}")
     Call<ProductoDTO> getProducto(@Path("id") int id);
 
-    /**
-     * Registro de producto EXCLUSIVO para móvil.
-     * Apuntamos a 'nuevo-movil' que es el método Multipart que agregamos al servidor.
-     */
+    // utiliza el nuevo metodo de la api
     @Multipart
-    @POST("producto/nuevo-movil") // <-- Cambiado para usar el nuevo endpoint
+    @POST("producto/nuevo-movil")
     Call<Void> crearProducto(
             @Part("producto") RequestBody producto,
             @Part MultipartBody.Part imagen
     );
 
-    /**
-     * Actualización de producto.
-     */
     @Multipart
     @PUT("producto/{id}")
     Call<Void> actualizarProducto(
@@ -37,10 +31,6 @@ public interface ProductoApi {
             @Part MultipartBody.Part imagen
     );
 
-    /**
-     * Eliminación de producto.
-     * Call<String> para recibir el mensaje de confirmación del servidor.
-     */
     @DELETE("producto/{id}")
     Call<String> eliminarProducto(@Path("id") int id);
 }

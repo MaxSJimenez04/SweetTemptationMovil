@@ -40,13 +40,9 @@ public class ProductoAdapter extends ListAdapter<ProductoDTO, ProductoAdapter.Vi
         this.imageListener = imageLoad;
     }
 
-    // Cambiamos el nombre para que coincida con el Fragmento
     public void actualizarImagen(int idProd, Bitmap bmp) {
-        // 1. Guardamos la imagen en el mapa
         imagenesCargadas.put(idProd, bmp);
 
-        // 2. Optimizamos: En lugar de refrescar TODA la lista,
-        // buscamos la posición del producto para refrescar solo ese cuadrito.
         for (int i = 0; i < getCurrentList().size(); i++) {
             if (getCurrentList().get(i).getId() == idProd) {
                 notifyItemChanged(i); // Esto hace que la imagen aparezca sin parpadeos
@@ -55,7 +51,6 @@ public class ProductoAdapter extends ListAdapter<ProductoDTO, ProductoAdapter.Vi
         }
     }
 
-    // Nombres de métodos corregidos: areItemsTheSame y areContentsTheSame
     private static final DiffUtil.ItemCallback<ProductoDTO> DIFF_CALLBACK = new DiffUtil.ItemCallback<ProductoDTO>() {
         @Override
         public boolean areItemsTheSame(@NonNull ProductoDTO oldItem, @NonNull ProductoDTO newItem) {

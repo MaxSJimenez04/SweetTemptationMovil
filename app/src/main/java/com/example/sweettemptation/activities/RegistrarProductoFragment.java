@@ -30,7 +30,7 @@ public class RegistrarProductoFragment extends Fragment {
     private Button btnRegistrar;
     private Uri uriSeleccionada;
 
-    // Lanzador para abrir la galería y obtener la imagen
+    // Para abrir la galería y obtener la imagen
     private final ActivityResultLauncher<String> mGetContent = registerForActivityResult(
             new ActivityResultContracts.GetContent(), uri -> {
                 if (uri != null) {
@@ -48,7 +48,6 @@ public class RegistrarProductoFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1. Inicialización de componentes UI
         txtNombre = view.findViewById(R.id.txtNombreProducto);
         txtPrecio = view.findViewById(R.id.txtPrecioUnitario);
         txtStock = view.findViewById(R.id.txtUnidades);
@@ -60,20 +59,16 @@ public class RegistrarProductoFragment extends Fragment {
 
         mViewModel = new ViewModelProvider(requireActivity()).get(ProductoViewModel.class);
 
-        // 2. Configurar Observadores
         configurarObservadores();
 
-        // 3. Cargar categorías inicialmente
         mViewModel.cargarCategorias();
 
-        // 4. Configuración de clics
         view.findViewById(R.id.btnCargarImagen).setOnClickListener(v -> mGetContent.launch("image/*"));
         btnRegistrar.setOnClickListener(v -> registrar());
         view.findViewById(R.id.btnCancelar).setOnClickListener(v -> getParentFragmentManager().popBackStack());
     }
 
     private void configurarObservadores() {
-        // Observar categorías para el Spinner
         mViewModel.getCategorias().observe(getViewLifecycleOwner(), lista -> {
             if (lista != null) {
                 ArrayAdapter<CategoriaDTO> adapter = new ArrayAdapter<>(requireContext(),
@@ -95,7 +90,6 @@ public class RegistrarProductoFragment extends Fragment {
             }
         });
 
-        // Observar mensajes de respuesta
         mViewModel.getMensaje().observe(getViewLifecycleOwner(), msg -> {
             if (msg != null) {
                 Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
@@ -106,8 +100,8 @@ public class RegistrarProductoFragment extends Fragment {
         });
     }
 
+    // TODO - revisar mas validaciones
     private void registrar() {
-        // --- 1. VALIDACIONES DE TEXTO ---
         String nombre = txtNombre.getText().toString().trim();
         String precioStr = txtPrecio.getText().toString().trim();
         String stockStr = txtStock.getText().toString().trim();
@@ -131,7 +125,6 @@ public class RegistrarProductoFragment extends Fragment {
         }
 
         try {
-            // --- 2. VALIDACIONES LÓGICAS ---
             BigDecimal precio = new BigDecimal(precioStr);
             int unidades = Integer.parseInt(stockStr);
 
@@ -140,20 +133,18 @@ public class RegistrarProductoFragment extends Fragment {
                 return;
             }
 
-            // --- 3. PREPARACIÓN DEL OBJETO ---
             ProductoDTO p = new ProductoDTO();
             p.setNombre(nombre);
             p.setPrecio(precio);
             p.setUnidades(unidades);
             p.setDescripcion(descripcion);
+            p.setDisponible(true);
 
             CategoriaDTO cat = (CategoriaDTO) cmbCategoria.getSelectedItem();
             if (cat != null) {
                 p.setCategoria(cat.getId());
             }
 
-            // --- 4. LLAMADA AL VIEWMODEL (MULTIPART) ---
-            // Se envían los 3 argumentos: DTO, Uri de la imagen y Contexto
             mViewModel.guardarProductoConImagen(p, uriSeleccionada, requireContext());
 
         } catch (NumberFormatException e) {

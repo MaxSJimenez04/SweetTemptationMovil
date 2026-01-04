@@ -53,7 +53,6 @@ public class ProductoViewModel extends ViewModel {
     public LiveData<ArchivoDTO> getImagenProducto() { return archivoProducto; }
 
     // --- MÉTODOS DE PRODUCTOS ---
-
     public void cargarProductos() {
         cargando.setValue(true);
         productoService.listarProductos(result -> {
@@ -65,7 +64,6 @@ public class ProductoViewModel extends ViewModel {
             }
         });
     }
-
     public void cargarCategorias() {
         categoriaService.listarCategorias(result -> {
             if (result.codigo == 200) {
@@ -73,21 +71,15 @@ public class ProductoViewModel extends ViewModel {
             }
         });
     }
-
-    /**
-     * MÉTODO CORREGIDO: Ahora recibe Uri y Context para soportar Multipart.
-     * De esta forma no necesitas modificar tu API de Spring Boot.
-     */
     public void guardarProductoConImagen(ProductoDTO producto, Uri uri, Context context) {
         cargando.setValue(true);
         mensaje.setValue(null);
 
-        // Llamamos al servicio pasando los 3 parámetros necesarios para Multipart
         productoService.crearProducto(producto, uri, context, result -> {
             cargando.postValue(false);
             if (result.codigo == 200 || result.codigo == 201) {
-                mensaje.postValue("¡Producto registrado exitosamente!");
-                cargarProductos(); // Refrescamos la lista automáticamente
+                mensaje.postValue("Producto registrado exitosamente");
+                cargarProductos();
             } else {
                 mensaje.postValue(result.mensaje);
             }
@@ -96,19 +88,22 @@ public class ProductoViewModel extends ViewModel {
 
     public void eliminarProducto(int idProducto) {
         cargando.setValue(true);
+        mensaje.setValue(null);
+
         productoService.eliminarProducto(idProducto, result -> {
             cargando.postValue(false);
-            if (result.codigo == 200 || result.codigo == 204) {
-                mensaje.postValue("Producto eliminado correctamente");
-                cargarProductos(); // Actualiza la lista al instante
+
+            if (result.codigo == 200) {
+                mensaje.postValue("¡Producto eliminado exitosamente!");
+
+                cargarProductos();
             } else {
-                mensaje.postValue(result.mensaje);
+                mensaje.postValue("Error: " + result.mensaje);
             }
         });
     }
 
     // --- LÓGICA DE CARGA DE IMÁGENES (PARA LA LISTA) ---
-
     public void obtenerRutaArchivo(int idProducto) {
         archivoService.obtenerDetallesArchivo(idProducto, result -> {
             if (result.codigo == 200 && result.datos != null) {
@@ -129,6 +124,23 @@ public class ProductoViewModel extends ViewModel {
                     result.datos.setIdProducto(idProducto);
                     archivoProducto.postValue(result.datos);
                 }
+            }
+        });
+    }
+
+    public void actualizarProducto(ProductoDTO producto, Uri uri, Context context) {
+        cargando.setValue(true);
+        mensaje.setValue(null);
+
+        // Llamamos al servicio de producto para realizar el PUT
+        productoService.actualizarProducto(producto, uri, context, result -> {
+            cargando.postValue(false);
+            // El código 200 indica que el servidor procesó la actualización correctamente
+            if (result.codigo == 200 || result.codigo == 201) {
+                mensaje.postValue("¡Producto actualizado exitosamente!");
+                cargarProductos(); // Refrescamos la lista general para ver los cambios
+            } else {
+                mensaje.postValue(result.mensaje);
             }
         });
     }

@@ -60,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /*
+    ==== Metodo original ===
+
     private void mostrarDatosUsuario() {
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         String nombre = prefs.getString("user_nombre", "Usuario");
@@ -82,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private void mostrarDatosUsuario() {
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         String nombre = prefs.getString("user_nombre", "Usuario");
-        String rol = prefs.getString("user_rol", ""); // Aquí llega "Administrador"
+        String rol = prefs.getString("user_rol", "");
 
         TextView tvBienvenida = findViewById(R.id.tvBienvenida);
         TextView tvRol = findViewById(R.id.tvRol);
@@ -90,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
         tvBienvenida.setText("Bienvenido, " + nombre);
         tvRol.setText("Rol: " + rol);
 
-        // CORRECCIÓN: Comprobar ambas posibilidades o usar "contains"
         if (rol.equalsIgnoreCase("ADMIN") || rol.equalsIgnoreCase("Administrador")) {
             btnGestionarProductos.setVisibility(View.VISIBLE);
         } else {

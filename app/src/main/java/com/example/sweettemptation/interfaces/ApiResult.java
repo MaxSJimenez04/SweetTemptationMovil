@@ -20,4 +20,8 @@ public class ApiResult<T> {
     public static <T> ApiResult<T> fallo(int codigo, String mensaje){
         return new ApiResult<>(false, null, codigo, mensaje);
     }
+
+    public boolean isExito() {
+        return codigo >= 200 && codigo < 300;
+    }
 }

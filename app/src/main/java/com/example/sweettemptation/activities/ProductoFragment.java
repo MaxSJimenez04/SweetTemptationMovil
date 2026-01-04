@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog; // Asegúrate de importar esto
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -45,22 +46,19 @@ public class ProductoFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1. Inicialización de vistas
         progress = view.findViewById(R.id.pbProgreso);
         recycler = view.findViewById(R.id.rvProductos);
         fabNuevo = view.findViewById(R.id.fabNuevoProducto);
 
-        // 2. ViewModel compartido (importante usar requireActivity() si se navega entre fragments)
         mViewModel = new ViewModelProvider(requireActivity()).get(ProductoViewModel.class);
 
-        // 3. Configuración del Adaptador con sus 3 Listeners
         adapter = new ProductoAdapter(
-                producto -> abrirFormularioEditar(producto),   // Click Editar
-                producto -> mViewModel.eliminarProducto(producto.getId()), // Click Eliminar
-                idProducto -> {                                 // Carga de Imagen
-                    Log.d(TAG, "Paso 1: El Adaptador pide imagen del ID: " + idProducto);
-                    mViewModel.obtenerRutaArchivo(idProducto);
-                }
+                producto -> {
+                    Log.d("NAVEGACION", "Abriendo detalle de: " + producto.getNombre());
+                    abrirFormularioEditar(producto);
+                },
+                producto -> confirmarEliminacion(producto),
+                idProducto -> mViewModel.obtenerRutaArchivo(idProducto)
         );
 
         recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -68,47 +66,49 @@ public class ProductoFragment extends Fragment {
 
         // --- OBSERVADORES ---
 
-        // Observar lista de productos
         mViewModel.getProductos().observe(getViewLifecycleOwner(), lista -> {
             if (lista != null) {
                 adapter.submitList(lista);
             }
         });
 
-        // Observar descarga de imágenes (EL PUNTO CRÍTICO)
         mViewModel.getImagenProducto().observe(getViewLifecycleOwner(), archivo -> {
             if (archivo != null && archivo.getDatos() != null) {
-                Log.d(TAG, "Paso 2: Datos de imagen recibidos para producto: " + archivo.getIdProducto());
-
                 Bitmap bmp = convertirArchivoABitmap(archivo);
                 if (bmp != null) {
-                    Log.d(TAG, "Paso 3: Actualizando adaptador con bitmap...");
-                    // Se usa idProducto para sincronizar con la fila correcta
                     adapter.actualizarImagen(archivo.getIdProducto(), bmp);
                 }
             }
         });
 
-        // Observar mensajes
         mViewModel.getMensaje().observe(getViewLifecycleOwner(), msg -> {
             if (msg != null && !msg.isBlank()) {
                 Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
-                mViewModel.mensaje.setValue(null); // Limpiar mensaje después de mostrarlo
+                mViewModel.mensaje.setValue(null);
             }
         });
 
-        // Observar ProgressBar
         mViewModel.getLoading().observe(getViewLifecycleOwner(), isLoading -> {
             if (progress != null) {
                 progress.setVisibility(Boolean.TRUE.equals(isLoading) ? View.VISIBLE : View.GONE);
             }
         });
 
-        // 4. Botón Nuevo Producto
         fabNuevo.setOnClickListener(v -> abrirFormularioRegistro());
 
-        // 5. Carga inicial
         mViewModel.cargarProductos();
+    }
+
+    private void confirmarEliminacion(ProductoDTO producto) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Eliminar Producto")
+                .setMessage("¿Estás seguro de que deseas eliminar '" + producto.getNombre() + "'? Esta acción no se puede deshacer en el futuro.")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton("Sí, eliminar", (dialog, which) -> {
+                    mViewModel.eliminarProducto(producto.getId());
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 
     private void abrirFormularioRegistro() {
@@ -119,24 +119,28 @@ public class ProductoFragment extends Fragment {
     }
 
     private void abrirFormularioEditar(ProductoDTO producto) {
-        Toast.makeText(getContext(), "Editar: " + producto.getNombre(), Toast.LENGTH_SHORT).show();
+        DetalleProductoFragment detalleFrag = DetalleProductoFragment.newInstance(producto);
+
+        // cambio de pantalla
+        getParentFragmentManager().beginTransaction()
+                .setCustomAnimations(
+                        android.R.anim.fade_in,
+                        android.R.anim.fade_out,
+                        android.R.anim.fade_in,
+                        android.R.anim.fade_out
+                )
+                .replace(R.id.fragment_container, detalleFrag)
+                .addToBackStack(null) // volver a la lista
+                .commit();
     }
 
-    // Método optimizado para convertir bytes a imagen
     private Bitmap convertirArchivoABitmap(ArchivoDTO archivo) {
-        if (archivo == null || archivo.getDatos() == null) {
-            Log.e(TAG, "Error: Datos de archivo nulos.");
-            return null;
-        }
-
+        if (archivo == null || archivo.getDatos() == null) return null;
         try {
-            // 1. Convertimos el String Base64 a un arreglo de bytes reales
             byte[] imageBytes = android.util.Base64.decode(archivo.getDatos(), android.util.Base64.DEFAULT);
-
-            // 2. Creamos el Bitmap a partir de esos bytes
             return BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
         } catch (Exception e) {
-            Log.e(TAG, "Error al decodificar la imagen: " + e.getMessage());
+            Log.e(TAG, "Error al decodificar: " + e.getMessage());
             return null;
         }
     }

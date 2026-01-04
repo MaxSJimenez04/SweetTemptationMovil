@@ -11,7 +11,6 @@ public class ProductoRequest implements Serializable {
         this.archivo = archivo;
     }
 
-    // Getters y Setters
     public ProductoDTO getProducto() { return producto; }
     public void setProducto(ProductoDTO producto) { this.producto = producto; }
     public ArchivoDTO getArchivo() { return archivo; }

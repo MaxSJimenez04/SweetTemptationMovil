@@ -22,9 +22,7 @@ public class ArchivoService {
         this.api = api;
     }
 
-    // 1. Sincronizado con @GetMapping("/detalle") de Spring Boot
     public Call<DetallesArchivoDTO> obtenerDetallesArchivo(int idProducto, ResultCallback<DetallesArchivoDTO> cb){
-        // Llamamos al método de la API (Asegúrate de que en ArchivoApi se llame así)
         Call<DetallesArchivoDTO> call = api.obtenerDetallesArchivo(idProducto);
         call.enqueue(new Callback<DetallesArchivoDTO>() {
             @Override
@@ -59,7 +57,6 @@ public class ArchivoService {
         return call;
     }
 
-    // 2. Sincronizado con @GetMapping("/{id}") de Spring Boot
     public Call<ArchivoDTO> obtenerImagen(int idArchivo, ResultCallback<ArchivoDTO> cb){
         Call<ArchivoDTO> call = api.obtenerImagen(idArchivo);
         call.enqueue(new Callback<ArchivoDTO>() {
@@ -86,8 +83,6 @@ public class ArchivoService {
         return call;
     }
 
-    // --- MÉTODOS PRIVADOS PARA LIMPIAR EL CÓDIGO ---
-
     private void manejarErroresEstandar(int codigo, Response<?> response, ResultCallback<?> cb) {
         if (codigo == 500) {
             cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_FALLA_SERVIDOR));
@@ -107,7 +102,6 @@ public class ArchivoService {
     }
 
     public Call<DetallesArchivoDTO> obtenerRutaArchivo(int idProducto, ResultCallback<DetallesArchivoDTO> cb) {
-        // Simplemente llamamos al nuevo método que ya creamos
         return obtenerDetallesArchivo(idProducto, cb);
     }
 }
