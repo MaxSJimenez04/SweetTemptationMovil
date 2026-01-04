@@ -8,11 +8,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog; // Asegúrate de importar esto
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,6 +33,8 @@ public class ProductoFragment extends Fragment {
     private RecyclerView recycler;
     private ProductoAdapter adapter;
     private FloatingActionButton fabNuevo;
+    private TextView txtSinResultados; // Nuevo: Para mostrar cuando no hay matches
+    private SearchView svBuscador;     // Nuevo: El buscador
 
     public static ProductoFragment newInstance() {
         return new ProductoFragment();
@@ -46,17 +50,18 @@ public class ProductoFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Inicialización de vistas
         progress = view.findViewById(R.id.pbProgreso);
         recycler = view.findViewById(R.id.rvProductos);
         fabNuevo = view.findViewById(R.id.fabNuevoProducto);
+        txtSinResultados = view.findViewById(R.id.txtSinResultados); // Asegúrate de añadirlo al XML
+        svBuscador = view.findViewById(R.id.svBuscador);
 
         mViewModel = new ViewModelProvider(requireActivity()).get(ProductoViewModel.class);
 
+        // Configuración del Adaptador
         adapter = new ProductoAdapter(
-                producto -> {
-                    Log.d("NAVEGACION", "Abriendo detalle de: " + producto.getNombre());
-                    abrirFormularioEditar(producto);
-                },
+                producto -> abrirFormularioEditar(producto),
                 producto -> confirmarEliminacion(producto),
                 idProducto -> mViewModel.obtenerRutaArchivo(idProducto)
         );
@@ -64,11 +69,28 @@ public class ProductoFragment extends Fragment {
         recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
         recycler.setAdapter(adapter);
 
+        // --- CONFIGURACIÓN DEL BUSCADOR ---
+        svBuscador.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.filtrar(newText);
+                validarListaVacia();
+                return true;
+            }
+        });
+
         // --- OBSERVADORES ---
 
         mViewModel.getProductos().observe(getViewLifecycleOwner(), lista -> {
             if (lista != null) {
-                adapter.submitList(lista);
+                // IMPORTANTE: setFullList para que el buscador conozca la lista nueva
+                adapter.setFullList(lista);
+                validarListaVacia();
             }
         });
 
@@ -99,10 +121,19 @@ public class ProductoFragment extends Fragment {
         mViewModel.cargarProductos();
     }
 
+    // Método para mostrar el texto "Sin resultados" si el filtro no encuentra nada
+    private void validarListaVacia() {
+        if (adapter.getItemCount() == 0) {
+            txtSinResultados.setVisibility(View.VISIBLE);
+        } else {
+            txtSinResultados.setVisibility(View.GONE);
+        }
+    }
+
     private void confirmarEliminacion(ProductoDTO producto) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Eliminar Producto")
-                .setMessage("¿Estás seguro de que deseas eliminar '" + producto.getNombre() + "'? Esta acción no se puede deshacer en el futuro.")
+                .setMessage("¿Estás seguro de que deseas eliminar '" + producto.getNombre() + "'?")
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton("Sí, eliminar", (dialog, which) -> {
                     mViewModel.eliminarProducto(producto.getId());
@@ -120,17 +151,11 @@ public class ProductoFragment extends Fragment {
 
     private void abrirFormularioEditar(ProductoDTO producto) {
         DetalleProductoFragment detalleFrag = DetalleProductoFragment.newInstance(producto);
-
-        // cambio de pantalla
         getParentFragmentManager().beginTransaction()
-                .setCustomAnimations(
-                        android.R.anim.fade_in,
-                        android.R.anim.fade_out,
-                        android.R.anim.fade_in,
-                        android.R.anim.fade_out
-                )
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
+                        android.R.anim.fade_in, android.R.anim.fade_out)
                 .replace(R.id.fragment_container, detalleFrag)
-                .addToBackStack(null) // volver a la lista
+                .addToBackStack(null)
                 .commit();
     }
 

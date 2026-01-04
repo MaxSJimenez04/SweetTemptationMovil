@@ -8,13 +8,16 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.sweettemptation.R;
 import com.example.sweettemptation.dto.ProductoDTO;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -24,6 +27,9 @@ public class ProductoAdapter extends ListAdapter<ProductoDTO, ProductoAdapter.Vi
     private final OnProductoClickListener deleteListener;
     private final OnImageLoadListener imageListener;
     private final Map<Integer, Bitmap> imagenesCargadas = new HashMap<>();
+
+    // LISTA DE RESPALDO: Para no perder los datos al filtrar
+    private List<ProductoDTO> listaCompleta = new ArrayList<>();
 
     public interface OnProductoClickListener {
         void onClick(ProductoDTO producto);
@@ -40,12 +46,34 @@ public class ProductoAdapter extends ListAdapter<ProductoDTO, ProductoAdapter.Vi
         this.imageListener = imageLoad;
     }
 
+    // NUEVO MÉTODO: Se usa desde el Fragmento para cargar datos nuevos del servidor
+    public void setFullList(List<ProductoDTO> list) {
+        this.listaCompleta = new ArrayList<>(list);
+        submitList(list);
+    }
+
+    // MÉTODO DE FILTRADO: Busca por nombre
+    public void filtrar(String texto) {
+        if (texto == null || texto.isEmpty()) {
+            submitList(new ArrayList<>(listaCompleta));
+        } else {
+            String query = texto.toLowerCase().trim();
+            List<ProductoDTO> filtrados = new ArrayList<>();
+            for (ProductoDTO p : listaCompleta) {
+                if (p.getNombre().toLowerCase().contains(query)) {
+                    filtrados.add(p);
+                }
+            }
+            submitList(filtrados);
+        }
+    }
+
     public void actualizarImagen(int idProd, Bitmap bmp) {
         imagenesCargadas.put(idProd, bmp);
-
-        for (int i = 0; i < getCurrentList().size(); i++) {
-            if (getCurrentList().get(i).getId() == idProd) {
-                notifyItemChanged(i); // Esto hace que la imagen aparezca sin parpadeos
+        // Notificar cambio solo al item específico para ahorrar recursos
+        for (int i = 0; i < getItemCount(); i++) {
+            if (getItem(i).getId() == idProd) {
+                notifyItemChanged(i);
                 break;
             }
         }
@@ -61,7 +89,8 @@ public class ProductoAdapter extends ListAdapter<ProductoDTO, ProductoAdapter.Vi
         public boolean areContentsTheSame(@NonNull ProductoDTO oldItem, @NonNull ProductoDTO newItem) {
             return oldItem.getNombre().equals(newItem.getNombre()) &&
                     oldItem.getPrecio().equals(newItem.getPrecio()) &&
-                    oldItem.getUnidades() == newItem.getUnidades();
+                    oldItem.getUnidades() == newItem.getUnidades() &&
+                    oldItem.isDisponible() == newItem.isDisponible();
         }
     };
 
