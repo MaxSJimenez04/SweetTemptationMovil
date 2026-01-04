@@ -1,4 +1,4 @@
-package com.example.sweettemptation.servicios;
+package com.example.sweettemptation.grpc;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -38,7 +38,7 @@ public class TicketGrpcService {
 
     public TicketGrpcService(Context context, boolean useTls){
         this.appContext = context.getApplicationContext();
-        OkHttpChannelBuilder builder = OkHttpChannelBuilder.forAddress(Constantes.URL_GRPC, Constantes.PUERTO_GRPC);
+        OkHttpChannelBuilder builder = OkHttpChannelBuilder.forAddress(Constantes.IP, Constantes.PUERTO_GRPC);
         if (useTls){
             builder.useTransportSecurity();
         }else {

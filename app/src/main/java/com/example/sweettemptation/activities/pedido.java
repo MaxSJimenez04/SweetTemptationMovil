@@ -1,15 +1,11 @@
 package com.example.sweettemptation.activities;
 
-import static android.content.Context.MODE_PRIVATE;
-
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Base64;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,21 +17,17 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.sweettemptation.R;
 import com.example.sweettemptation.dto.ArchivoDTO;
-import com.example.sweettemptation.dto.DetallesArchivoDTO;
 import com.example.sweettemptation.dto.DetallesProductoDTO;
 import com.example.sweettemptation.model.Pedido;
 import com.example.sweettemptation.utils.Constantes;
 
 import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 public class pedido extends Fragment {
 
@@ -161,10 +153,19 @@ public class pedido extends Fragment {
             mViewModel.cancelarPedido(pedidoActual.getId(), idCliente);
         });
 
+        //Empieza grpc
+        mViewModel.init(requireContext());
+        mViewModel.ticketDescargado.observe(getViewLifecycleOwner(), uri -> {
+            if (uri != null) {
+                Toast.makeText(requireContext(),
+                        "Ticket descargado correctamente",
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+
         btnPagar.setOnClickListener(v -> {
-            // Navegación la decide el Fragment/Activity (UI)
-            // Ejemplo (Navigation Component):
-            // NavHostFragment.findNavController(this).navigate(R.id.action_pedido_to_tipoPago);
+            //TODO: borrar prueba generar ticket
+           mViewModel.descargarTicket(pedidoActual.getId());
         });
 
         mViewModel.getProductosPedido().observe(getViewLifecycleOwner(), lista -> {
