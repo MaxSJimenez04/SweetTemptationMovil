@@ -43,23 +43,47 @@
         android:textSize="14sp"
         android:textColor="@color/text_hint"
         android:layout_marginTop="24dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnCerrarSesion"
+        app:layout_constraintBottom_toTopOf="@+id/btnGestionarProductos"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvRol" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGestionarProductos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Gestionar Productos"
+        app:icon="@android:drawable/ic_menu_edit"
+        app:cornerRadius="12dp"
+        app:backgroundTint="@color/primary"
+        app:layout_constraintBottom_toTopOf="@+id/btnCerrarSesion"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvMensaje" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCerrarSesion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="Cerrar Sesión"
-        android:layout_marginTop="48dp"
         app:icon="@android:drawable/ic_lock_idle_lock"
         app:cornerRadius="12dp"
         app:backgroundTint="@color/primary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvMensaje" />
+        app:layout_constraintTop_toBottomOf="@+id/btnGestionarProductos" />
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="visible"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
