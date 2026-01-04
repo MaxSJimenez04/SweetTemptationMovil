@@ -22,8 +22,8 @@ public class ArchivoService {
         this.api = api;
     }
 
-    public Call<DetallesArchivoDTO> obtenerRutaArchivo(int idProducto, ResultCallback<DetallesArchivoDTO> cb){
-        Call<DetallesArchivoDTO> call = api.obtenerRutaArchivo(idProducto);
+    public Call<DetallesArchivoDTO> obtenerDetallesArchivo(int idProducto, ResultCallback<DetallesArchivoDTO> cb){
+        Call<DetallesArchivoDTO> call = api.obtenerDetallesArchivo(idProducto);
         call.enqueue(new Callback<DetallesArchivoDTO>() {
             @Override
             public void onResponse(Call<DetallesArchivoDTO> call, Response<DetallesArchivoDTO> response) {
@@ -35,30 +35,23 @@ public class ArchivoService {
                 int codigo = response.code();
                 switch (codigo){
                     case 400:
-                        cb.onResult(ApiResult.fallo(400, "ID del archivo es inválido"));
+                        cb.onResult(ApiResult.fallo(codigo, "Los datos de búsqueda son inválidos"));
                         break;
                     case 403:
-                        cb.onResult(ApiResult.fallo(403, Constantes.MENSAJE_NO_AUTORIZADO));
-                    case 404:
-                        cb.onResult(ApiResult.fallo(404, "No se encontró la ruta especificada"));
+                        cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_NO_AUTORIZADO));
                         break;
-                    case 500:
-                        cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_FALLA_SERVIDOR));
+                    case 404:
+                        cb.onResult(ApiResult.fallo(codigo, "Este pastel aún no tiene una foto asignada"));
                         break;
                     default:
-                        String mensaje = ValidacionesRespuesta.leerErrorBody(response.errorBody());
-                        if (mensaje == null || mensaje.isBlank())
-                            mensaje = "Error: " + codigo;
-                        cb.onResult(ApiResult.fallo(codigo, mensaje));
+                        manejarErroresEstandar(codigo, response, cb);
                         break;
                 }
             }
 
             @Override
             public void onFailure(Call<DetallesArchivoDTO> call, Throwable t) {
-                if (ValidacionesRespuesta.esDesconexion(t)){
-                    cb.onResult(ApiResult.fallo(503, Constantes.MENSAJE_SIN_CONEXION));
-                }
+                manejarFallaConexion(t, cb);
             }
         });
         return call;
@@ -75,31 +68,40 @@ public class ArchivoService {
                 }
 
                 int codigo = response.code();
-                switch (codigo){
-                    case 404:
-                        cb.onResult(ApiResult.fallo(codigo, "No se encontró el cliente especificado"));
-                        break;
-                    case 500:
-                        cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_FALLA_SERVIDOR));
-                        break;
-                    default:
-                        String mensaje = ValidacionesRespuesta.leerErrorBody(response.errorBody());
-                        if (mensaje == null || mensaje.isBlank())
-                            mensaje = "Error: " + codigo;
-                        cb.onResult(ApiResult.fallo(codigo, mensaje));
-                        break;
+                if (codigo == 404) {
+                    cb.onResult(ApiResult.fallo(codigo, "No se encontró el archivo de imagen"));
+                } else {
+                    manejarErroresEstandar(codigo, response, cb);
                 }
             }
 
             @Override
             public void onFailure(Call<ArchivoDTO> call, Throwable t) {
-                if (ValidacionesRespuesta.esDesconexion(t)){
-                    cb.onResult(ApiResult.fallo(503, Constantes.MENSAJE_SIN_CONEXION));
-                }
+                manejarFallaConexion(t, cb);
             }
         });
         return call;
     }
 
+    private void manejarErroresEstandar(int codigo, Response<?> response, ResultCallback<?> cb) {
+        if (codigo == 500) {
+            cb.onResult(ApiResult.fallo(codigo, Constantes.MENSAJE_FALLA_SERVIDOR));
+        } else {
+            String mensaje = ValidacionesRespuesta.leerErrorBody(response.errorBody());
+            if (mensaje == null || mensaje.isBlank()) mensaje = "Error: " + codigo;
+            cb.onResult(ApiResult.fallo(codigo, mensaje));
+        }
+    }
 
+    private void manejarFallaConexion(Throwable t, ResultCallback<?> cb) {
+        if (ValidacionesRespuesta.esDesconexion(t)) {
+            cb.onResult(ApiResult.fallo(503, Constantes.MENSAJE_SIN_CONEXION));
+        } else {
+            cb.onResult(ApiResult.fallo(500, "Error de red: " + t.getMessage()));
+        }
+    }
+
+    public Call<DetallesArchivoDTO> obtenerRutaArchivo(int idProducto, ResultCallback<DetallesArchivoDTO> cb) {
+        return obtenerDetallesArchivo(idProducto, cb);
+    }
 }

@@ -1,36 +1,38 @@
 package com.example.sweettemptation.dto;
 
-import java.time.LocalDateTime;
+import java.io.Serializable;
 
-public class ArchivoDTO {
+public class ArchivoDTO implements Serializable {
     private int id;
-    private LocalDateTime fechaRegistro;
+    private String fechaRegistro;
     private String extension;
     private String datos;
 
+    private int idProducto;
+
     public ArchivoDTO() {
     }
-
-    public ArchivoDTO(int id, LocalDateTime fechaRegistro, String extension, String datos) {
+    public ArchivoDTO(int id, String fechaRegistro, String extension, String datos) {
         this.id = id;
         this.fechaRegistro = fechaRegistro;
         this.extension = extension;
         this.datos = datos;
+
     }
 
-    public int getId() {
-        return id;
+    public void setIdProducto(int idProducto) {
+        this.idProducto = idProducto;
     }
 
     public void setId(int id) {
         this.id = id;
     }
 
-    public LocalDateTime getFechaRegistro() {
+    public String getFechaRegistro() {
         return fechaRegistro;
     }
 
-    public void setFechaRegistro(LocalDateTime fechaRegistro) {
+    public void setFechaRegistro(String fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
     }
 
@@ -48,5 +50,13 @@ public class ArchivoDTO {
 
     public void setDatos(String datos) {
         this.datos = datos;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getIdProducto() {
+        return idProducto;
     }
 }
