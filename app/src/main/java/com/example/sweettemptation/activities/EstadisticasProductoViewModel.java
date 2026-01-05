@@ -9,8 +9,10 @@ import com.example.sweettemptation.dto.EstadisticaVentaProductoDTO;
 import com.example.sweettemptation.dto.ProductoDTO;
 import com.example.sweettemptation.interfaces.ApiResult;
 import com.example.sweettemptation.interfaces.EstadisticasApi;
+import com.example.sweettemptation.interfaces.ProductoApi;
 import com.example.sweettemptation.network.ApiCliente;
 import com.example.sweettemptation.servicios.EstadisticasService;
+import com.example.sweettemptation.servicios.ProductoService;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -24,16 +26,18 @@ public class EstadisticasProductoViewModel extends ViewModel {
     public final MutableLiveData<List<EstadisticaVentaProductoDTO>> ventasPorProducto =new MutableLiveData<>(null);
     public final MutableLiveData<Boolean> cargando = new MutableLiveData<>(false);
     public final MutableLiveData<String> mensaje = new MutableLiveData<>(null);
-
+    public final MutableLiveData<RangoFechas> rango = new MutableLiveData<>(null);
     public final MutableLiveData<List<ProductoDTO>> listaProductos = new MutableLiveData<>(null);
 
     private final EstadisticasService estadisticasService;
-    //TODO: agregar servicio producto
+    private final ProductoService productoService;
 
 
     public EstadisticasProductoViewModel(){
         EstadisticasApi estadisticasApi = ApiCliente.getInstance().retrofit().create(EstadisticasApi.class);
         this.estadisticasService = new EstadisticasService(estadisticasApi);
+        ProductoApi productoApi = ApiCliente.getInstance().retrofit().create(ProductoApi.class);
+        this.productoService = new ProductoService(productoApi);
     }
 
     public LiveData<Boolean> getCargando() {
@@ -43,6 +47,7 @@ public class EstadisticasProductoViewModel extends ViewModel {
     public LiveData<String> getMensaje() {
         return mensaje;
     }
+    public LiveData<RangoFechas> getRango(){return rango;}
 
     public LiveData<List<EstadisticaProductoDTO>> getEstadisticasProductosVendidos() {
         return estadisticasProductosVendidos;
@@ -65,20 +70,21 @@ public class EstadisticasProductoViewModel extends ViewModel {
             this.fin = fin;
         }
     }
-    public RangoFechas obtenerFechasRango(String rango){
+    public void obtenerFechasRango(String rangoSeleccionado){
         LocalDate hoy = LocalDate.now();
-        switch (rango){
+        rango.setValue(new RangoFechas(hoy.minusDays(6), hoy));
+        switch (rangoSeleccionado){
             case "Semana pasada":
-                return new RangoFechas(hoy.minusDays(6), hoy);
+                  rango.postValue(new RangoFechas(hoy.minusDays(6), hoy));
             case "Quincena pasada":
-                return new RangoFechas(hoy.minusDays(14), hoy);
+                 rango.postValue(new RangoFechas(hoy.minusDays(14), hoy));
             case "Mes pasado":
                 YearMonth mes = YearMonth.from(hoy).minusMonths(1);
                 LocalDate inicio = mes.atDay(1);
                 LocalDate fin = mes.atEndOfMonth();
-                return new RangoFechas(inicio,fin);
+                 rango.postValue(new RangoFechas(inicio,fin));
             default:
-                return new RangoFechas(hoy.minusDays(6), hoy);
+                 rango.postValue(new RangoFechas(hoy.minusDays(6), hoy));
         }
     }
 
@@ -128,5 +134,17 @@ public class EstadisticasProductoViewModel extends ViewModel {
                        }
                     }
                 });
+    }
+
+    public void cargarProductos() {
+        cargando.setValue(true);
+        productoService.listarProductos(result -> {
+            cargando.postValue(false);
+            if (result.codigo == 200) {
+                listaProductos.postValue(result.datos);
+            } else {
+                mensaje.postValue(result.mensaje);
+            }
+        });
     }
 }
