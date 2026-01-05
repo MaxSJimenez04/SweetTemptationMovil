@@ -3,13 +3,13 @@ package com.example.sweettemptation.activities;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.sweettemptation.R;
 import com.example.sweettemptation.auth.TokenStorage;
@@ -23,7 +23,7 @@ public class ClienteActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         binding = ActivityClienteBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -31,6 +31,11 @@ public class ClienteActivity extends AppCompatActivity {
 
         configurarMenus();
         configurarFab();
+
+        // Cargar el catálogo por defecto al iniciar la actividad
+        if (savedInstanceState == null) {
+            reemplazarFragmento(new CatalogoProductosClienteFragment());
+        }
     }
 
     private void configurarMenus() {
@@ -47,20 +52,14 @@ public class ClienteActivity extends AppCompatActivity {
         binding.abBottom.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
             if (id == R.id.btnHistorial) {
-                Toast.makeText(this, "Historial de pedidos", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Historial próximamente", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (id == R.id.btnCarrito) {
-                Fragment actual = getSupportFragmentManager().findFragmentById(R.id.nav_host);
-                if (!(actual instanceof pedido)) {
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.nav_host, new pedido())
-                            .addToBackStack(null)
-                            .commit();
-                }
+                reemplazarFragmento(new pedido()); // Cambiar a tu fragmento de carrito
                 return true;
             } else if (id == R.id.btnProductos) {
-                Toast.makeText(this, "Catálogo de productos", Toast.LENGTH_SHORT).show();
+                // ENLACE A TU CATÁLOGO
+                reemplazarFragmento(new CatalogoProductosClienteFragment());
                 return true;
             }
             return false;
@@ -68,37 +67,27 @@ public class ClienteActivity extends AppCompatActivity {
     }
 
     private void configurarFab() {
-        binding.btnMenu.setOnClickListener(v -> {
-            // Mostrar menú principal con opciones
-            mostrarMenuPrincipal();
-        });
+        binding.btnMenu.setOnClickListener(v -> mostrarMenuPrincipal());
     }
 
     private void mostrarMenuPrincipal() {
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         String nombre = prefs.getString("user_nombre", "Usuario");
-        
+
         String[] opciones = {"Ver Catálogo", "Mis Pedidos", "Mi Carrito", "Mi Perfil", "Cerrar Sesión"};
-        
+
         new AlertDialog.Builder(this)
                 .setTitle("Hola, " + nombre)
                 .setItems(opciones, (dialog, which) -> {
                     switch (which) {
-                        case 0:
-                            Toast.makeText(this, "Catálogo próximamente", Toast.LENGTH_SHORT).show();
+                        case 0: // Ver Catálogo
+                            reemplazarFragmento(new CatalogoProductosClienteFragment());
                             break;
                         case 1:
                             Toast.makeText(this, "Pedidos próximamente", Toast.LENGTH_SHORT).show();
                             break;
-                        case 2:
-                            Fragment actual = getSupportFragmentManager().findFragmentById(R.id.nav_host);
-                            if (!(actual instanceof pedido)) {
-                                getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .replace(R.id.nav_host, new pedido())
-                                        .addToBackStack(null)
-                                        .commit();
-                            }
+                        case 2: // Mi Carrito
+                            reemplazarFragmento(new pedido());
                             break;
                         case 3:
                             Toast.makeText(this, "Perfil próximamente", Toast.LENGTH_SHORT).show();
@@ -111,22 +100,30 @@ public class ClienteActivity extends AppCompatActivity {
                 .show();
     }
 
+    private void reemplazarFragmento(Fragment fragmento) {
+        Fragment actual = getSupportFragmentManager().findFragmentById(R.id.nav_host);
+
+        // Solo reemplazamos si el fragmento nuevo es distinto al que ya se ve
+        if (actual == null || !actual.getClass().equals(fragmento.getClass())) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .replace(R.id.nav_host, fragmento)
+                    .addToBackStack(null)
+                    .commit();
+        }
+    }
+
     private void mostrarMenuCuenta() {
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         String nombre = prefs.getString("user_nombre", "Usuario");
-        
         String[] opciones = {"Mi perfil", "Cerrar sesión"};
-        
         new AlertDialog.Builder(this)
                 .setTitle("Hola, " + nombre)
                 .setItems(opciones, (dialog, which) -> {
-                    if (which == 0) {
-                        Toast.makeText(this, "Perfil próximamente", Toast.LENGTH_SHORT).show();
-                    } else if (which == 1) {
-                        confirmarCerrarSesion();
-                    }
-                })
-                .show();
+                    if (which == 0) Toast.makeText(this, "Perfil próximamente", Toast.LENGTH_SHORT).show();
+                    else if (which == 1) confirmarCerrarSesion();
+                }).show();
     }
 
     private void confirmarCerrarSesion() {
@@ -139,14 +136,9 @@ public class ClienteActivity extends AppCompatActivity {
     }
 
     public void cerrarSesion() {
-        // Limpiar token
         tokenStorage.clear();
-        
-        // Limpiar datos de usuario
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         prefs.edit().clear().apply();
-        
-        // Ir al login
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -159,4 +151,3 @@ public class ClienteActivity extends AppCompatActivity {
         binding = null;
     }
 }
-
