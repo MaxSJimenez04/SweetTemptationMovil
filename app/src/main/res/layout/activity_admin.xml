@@ -27,7 +27,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="56dp"
-        android:layout_marginBottom="56dp"/>
+        android:layout_marginBottom="56dp"
+        app:defaultNavHost = "true"
+        app:navGraph = "@navigation/nav_admin_graph"
+        />
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/abBottom"
