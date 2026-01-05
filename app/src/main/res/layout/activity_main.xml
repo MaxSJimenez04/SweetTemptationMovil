@@ -57,10 +57,24 @@
         app:icon="@android:drawable/ic_menu_edit"
         app:cornerRadius="12dp"
         app:backgroundTint="@color/primary"
-        app:layout_constraintBottom_toTopOf="@+id/btnCerrarSesion"
+        app:layout_constraintBottom_toTopOf="@+id/btnSeleccionarEstadisticas"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvMensaje" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSeleccionarEstadisticas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Ver estadisticas"
+        app:icon="@android:drawable/ic_menu_edit"
+        app:cornerRadius="12dp"
+        app:backgroundTint="@color/primary"
+        app:layout_constraintBottom_toTopOf="@+id/btnCerrarSesion"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnGestionarProductos" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnCerrarSesion"
@@ -74,7 +88,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnGestionarProductos" />
+        app:layout_constraintTop_toBottomOf="@+id/btnSeleccionarEstadisticas"/>
 
     <FrameLayout
         android:id="@+id/fragment_container"
@@ -84,6 +98,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:visibility="visible"/>
+        android:visibility="visible"
+
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.sweettemptation.R;
 import com.example.sweettemptation.dto.ProductoDTO;
@@ -24,7 +25,7 @@ import com.github.mikephil.charting.charts.LineChart;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class estadisticasProducto extends Fragment {
+public class EstadisticasProductoFragment extends Fragment {
     private EstadisticasProductoViewModel mViewModel;
 
     private ProgressBar progreso;
@@ -48,7 +49,6 @@ public class estadisticasProducto extends Fragment {
         LineChart lcGrafica = view.findViewById(R.id.lineChart);
         View tbMasVendidos = view.findViewById(R.id.tblVentasAltas);
         View tbMenosVendidos = view.findViewById(R.id.tblVentasBajas);
-
         mViewModel = new ViewModelProvider(requireActivity()).get(EstadisticasProductoViewModel.class);
 
 
@@ -93,7 +93,7 @@ public class estadisticasProducto extends Fragment {
         });
 
         btnRegresar.setOnClickListener(v -> {
-            getActivity().getSupportFragmentManager().popBackStack();
+            NavHostFragment.findNavController(EstadisticasProductoFragment.this).popBackStack();
         });
     }
 }

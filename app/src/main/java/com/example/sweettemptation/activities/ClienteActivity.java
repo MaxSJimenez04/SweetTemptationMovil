@@ -3,8 +3,6 @@ package com.example.sweettemptation.activities;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -51,10 +49,10 @@ public class ClienteActivity extends AppCompatActivity {
                 return true;
             } else if (id == R.id.btnCarrito) {
                 Fragment actual = getSupportFragmentManager().findFragmentById(R.id.nav_host);
-                if (!(actual instanceof pedido)) {
+                if (!(actual instanceof PedidoFragment)) {
                     getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(R.id.nav_host, new pedido())
+                            .replace(R.id.nav_host, new PedidoFragment())
                             .addToBackStack(null)
                             .commit();
                 }
@@ -92,10 +90,10 @@ public class ClienteActivity extends AppCompatActivity {
                             break;
                         case 2:
                             Fragment actual = getSupportFragmentManager().findFragmentById(R.id.nav_host);
-                            if (!(actual instanceof pedido)) {
+                            if (!(actual instanceof PedidoFragment)) {
                                 getSupportFragmentManager()
                                         .beginTransaction()
-                                        .replace(R.id.nav_host, new pedido())
+                                        .replace(R.id.nav_host, new PedidoFragment())
                                         .addToBackStack(null)
                                         .commit();
                             }
