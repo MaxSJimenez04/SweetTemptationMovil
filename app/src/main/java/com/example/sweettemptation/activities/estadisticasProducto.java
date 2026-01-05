@@ -1,5 +1,6 @@
 package com.example.sweettemptation.activities;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,6 +72,7 @@ public class estadisticasProducto extends Fragment {
         cbRangoFechas.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             boolean first = true;
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
                 if (first) { first = false; }
@@ -93,7 +95,5 @@ public class estadisticasProducto extends Fragment {
         btnRegresar.setOnClickListener(v -> {
             getActivity().getSupportFragmentManager().popBackStack();
         });
-
-
     }
 }
