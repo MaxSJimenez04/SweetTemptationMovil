@@ -1,53 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="@color/background"
+    tools:context=".activities.AdminActivity">
 
-    <com.google.android.material.bottomappbar.BottomAppBar
-        android:id="@+id/abTop"
+    <!-- Barra superior con logo -->
+    <LinearLayout
+        android:id="@+id/barraTop"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_gravity="top"
         android:background="@color/black"
-        app:menuAlignmentMode="auto"
-        app:menu="@menu/menu_arriba">
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
         <ImageView
-            android:id="@+id/imgLogoCentro"
+            android:id="@+id/imgLogo"
             android:layout_width="120dp"
             android:layout_height="40dp"
-            android:layout_gravity="center"
             android:src="@drawable/logo_sweettemptation2"
             android:contentDescription="@string/app_name"
             android:scaleType="fitCenter" />
-    </com.google.android.material.bottomappbar.BottomAppBar>
+    </LinearLayout>
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/nav_host"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="56dp"
-        android:layout_marginBottom="56dp"/>
-
-    <com.google.android.material.bottomappbar.BottomAppBar
-        android:id="@+id/abBottom"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_gravity="bottom"
-        android:background="@color/black"
-        app:menu="@menu/menu_admin_abajo"
-        app:fabAlignmentMode="center"
-        app:fabCradleMargin="8dp"
-        app:fabCradleRoundedCornerRadius="28dp"
-        app:hideOnScroll="false" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btnMenu"
+    <!-- Título -->
+    <TextView
+        android:id="@+id/tvTitulo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/icon_menu"
-        android:translationY="-28dp"
-        app:fabSize="normal"
-        app:layout_anchor="@+id/abBottom"
-        />
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        android:text="Panel de Administrador"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/primary"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barraTop" />
+
+    <!-- Bienvenida -->
+    <TextView
+        android:id="@+id/tvBienvenida"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bienvenido, Usuario"
+        android:textSize="20sp"
+        android:textColor="@color/text_primary"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitulo" />
+
+    <!-- Rol -->
+    <TextView
+        android:id="@+id/tvRol"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rol: Administrador"
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginTop="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvBienvenida" />
+
+    <!-- Contenedor de botones -->
+    <LinearLayout
+        android:id="@+id/layoutBotones"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@+id/tvRol"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Botón Gestionar Cuentas -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnUsuarios"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Gestionar Cuentas"
+            android:textSize="16sp"
+            app:icon="@drawable/icon_empleados"
+            app:iconGravity="start"
+            app:iconPadding="12dp"
+            app:cornerRadius="12dp"
+            app:backgroundTint="@color/primary"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Botón Gestión de Productos -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnProductos"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Gestión de Productos"
+            android:textSize="16sp"
+            app:icon="@drawable/icon_productos"
+            app:iconGravity="start"
+            app:iconPadding="12dp"
+            app:cornerRadius="12dp"
+            app:backgroundTint="@color/primary"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Botón Ver Estadísticas -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEstadisticas"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Ver Estadísticas"
+            android:textSize="16sp"
+            app:icon="@drawable/icon_estadisiticas"
+            app:iconGravity="start"
+            app:iconPadding="12dp"
+            app:cornerRadius="12dp"
+            app:backgroundTint="@color/primary"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Botón Cerrar Sesión -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Cerrar Sesión"
+            android:textSize="16sp"
+            app:icon="@android:drawable/ic_lock_idle_lock"
+            app:iconGravity="start"
+            app:iconPadding="12dp"
+            app:cornerRadius="12dp"
+            app:backgroundTint="@color/error" />
+
+    </LinearLayout>
+
+    <!-- FrameLayout para fragmentos (oculto por defecto) -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

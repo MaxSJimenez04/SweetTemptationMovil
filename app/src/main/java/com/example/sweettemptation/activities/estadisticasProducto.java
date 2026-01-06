@@ -33,7 +33,7 @@ public class estadisticasProducto extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_pedido, container, false);
+        return inflater.inflate(R.layout.fragment_estadisticasproducto, container, false);
     }
 
     @Override

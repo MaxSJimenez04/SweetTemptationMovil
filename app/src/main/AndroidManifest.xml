@@ -19,7 +19,8 @@
         <!-- Login Activity - Pantalla inicial -->
         <activity
             android:name=".activities.LoginActivity"
-            android:exported="true">
+            android:exported="true"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -34,6 +35,16 @@
         <!-- Cliente Activity - Pantalla para clientes -->
         <activity
             android:name=".activities.ClienteActivity"
+            android:exported="false" />
+
+        <!-- Admin Activity - Panel de administrador -->
+        <activity
+            android:name=".activities.AdminActivity"
+            android:exported="false" />
+
+        <!-- Usuarios Activity - Gestión de usuarios -->
+        <activity
+            android:name=".activities.UsuariosActivity"
             android:exported="false" />
             
     </application>
