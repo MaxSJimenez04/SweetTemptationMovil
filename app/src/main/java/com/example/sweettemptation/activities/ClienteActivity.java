@@ -54,7 +54,7 @@ public class ClienteActivity extends AppCompatActivity {
                 Toast.makeText(this, "Historial próximamente", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (id == R.id.btnCarrito) {
-                reemplazarFragmento(new pedido());
+                reemplazarFragmento(new PedidoFragment());
                 return true;
             } else if (id == R.id.btnProductos) {
                 reemplazarFragmento(new CatalogoProductosClienteFragment());
@@ -85,7 +85,7 @@ public class ClienteActivity extends AppCompatActivity {
                             Toast.makeText(this, "Pedidos próximamente", Toast.LENGTH_SHORT).show();
                             break;
                         case 2: // Mi Carrito
-                            reemplazarFragmento(new pedido());
+                            reemplazarFragmento(new PedidoFragment());
                             break;
                         case 3:
                             Toast.makeText(this, "Perfil próximamente", Toast.LENGTH_SHORT).show();

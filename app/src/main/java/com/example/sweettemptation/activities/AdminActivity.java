@@ -27,6 +27,10 @@ public class AdminActivity extends AppCompatActivity {
         
         binding = ActivityAdminBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        
+        // Inicializar TokenStorage (necesario para cerrar sesión)
+        tokenStorage = new TokenStorage(this);
+        
         configurarMenus();
         configurarFab();
     }
