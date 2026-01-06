@@ -3,12 +3,19 @@ package com.example.sweettemptation.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.example.sweettemptation.MainActivity;
 import android.content.SharedPreferences;
+import com.example.sweettemptation.R;
 import com.example.sweettemptation.auth.TokenStorage;
 import com.example.sweettemptation.databinding.ActivityLoginBinding;
 import com.example.sweettemptation.dto.LoginRequest;
@@ -34,6 +41,9 @@ public class LoginActivity extends AppCompatActivity {
         // Inicializar ViewBinding
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        // Configurar barras del sistema
+        configurarBarrasSistema();
 
         // Inicializar ApiCliente si no está inicializado
         ApiCliente.init(this);
@@ -148,11 +158,14 @@ public class LoginActivity extends AppCompatActivity {
     private void navegarSegunRol(String rol) {
         Intent intent;
         
-        if ("CLIENTE".equalsIgnoreCase(rol)) {
+        if ("ADMIN".equalsIgnoreCase(rol) || "Administrador".equalsIgnoreCase(rol)) {
+            // Administrador va a AdminActivity
+            intent = new Intent(this, AdminActivity.class);
+        } else if ("CLIENTE".equalsIgnoreCase(rol)) {
+            // Cliente va a ClienteActivity
             intent = new Intent(this, ClienteActivity.class);
         } else {
-            // Para ADMIN y EMPLEADO, por ahora ir a MainActivity
-            // TODO: Crear AdminActivity y EmpleadoActivity
+            // Empleado va a MainActivity
             intent = new Intent(this, MainActivity.class);
         }
         
@@ -166,6 +179,42 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         String rol = prefs.getString("user_rol", "CLIENTE");
         navegarSegunRol(rol);
+    }
+
+    private void configurarBarrasSistema() {
+        Window window = getWindow();
+        
+        // Establecer colores de las barras
+        window.setStatusBarColor(ContextCompat.getColor(this, R.color.black));
+        window.setNavigationBarColor(ContextCompat.getColor(this, R.color.black));
+        
+        // Modo inmersivo - barras se ocultan y aparecen con swipe
+        View decorView = window.getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        );
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            // Re-aplicar modo inmersivo cuando la ventana recupera el foco
+            View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            );
+        }
     }
 
     @Override
