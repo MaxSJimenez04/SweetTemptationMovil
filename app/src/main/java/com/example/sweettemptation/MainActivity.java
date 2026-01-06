@@ -17,6 +17,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.sweettemptation.activities.LoginActivity;
 import com.example.sweettemptation.activities.ProductoFragment;
+import com.example.sweettemptation.activities.SeleccionarEstadisticasFragment;
 import com.example.sweettemptation.auth.TokenStorage;
 import com.google.android.material.button.MaterialButton;
 
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TokenStorage tokenStorage;
     private MaterialButton btnGestionarProductos;
+    private MaterialButton btnSeleccionarEstadisticas;
     private View layoutContenidoPrincipal; // Para agrupar y ocultar la bienvenida
 
     @Override
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Inicializar vistas
         btnGestionarProductos = findViewById(R.id.btnGestionarProductos);
+        btnSeleccionarEstadisticas = findViewById(R.id.btnSeleccionarEstadisticas);
         Button btnCerrarSesion = findViewById(R.id.btnCerrarSesion);
 
         // Mostrar datos y validar el botón por Rol
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         // Configurar botones
         btnGestionarProductos.setOnClickListener(v -> abrirGestionProductos());
         btnCerrarSesion.setOnClickListener(v -> confirmarCerrarSesion());
+        btnSeleccionarEstadisticas.setOnClickListener(v -> abrirSeleccionarEstadisticas());
 
         // Escuchar cuando regresas de un fragmento para volver a mostrar la bienvenida
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
@@ -107,6 +111,12 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, new ProductoFragment())
                 .addToBackStack(null) // Esto permite usar el botón "atrás" del cel
+                .commit();
+    }
+
+    private void abrirSeleccionarEstadisticas(){
+        alternarVisibilidadBienvenida(false);
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new SeleccionarEstadisticasFragment()).addToBackStack(null)
                 .commit();
     }
 

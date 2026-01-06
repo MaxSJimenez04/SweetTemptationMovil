@@ -44,7 +44,7 @@ public class AdminActivity extends AppCompatActivity {
         binding.abBottom.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
             if (id == R.id.btnEstadisticas) {
-                //TODO: cambiar a fragment seleccionar estadisticas
+                reemplazarFragmento(new SeleccionarEstadisticasFragment());
                 return true;
             } else if (id == R.id.btnCuentas) {
                 //TODO: cambiar a fragment de gestionar cuentas
@@ -75,7 +75,7 @@ public class AdminActivity extends AppCompatActivity {
                             reemplazarFragmento(new CatalogoProductosClienteFragment());
                             break;
                         case 1:
-                            //Todo: cambiar a seleccionar estadisticas
+                            reemplazarFragmento(new SeleccionarEstadisticasFragment());
                             break;
                         case 2:
                             //TODO: cambiar a gestionar cuentas

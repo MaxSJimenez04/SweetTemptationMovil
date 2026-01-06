@@ -74,6 +74,8 @@ dependencies {
     implementation "io.grpc:grpc-protobuf-lite:1.78.0"
     //noinspection UseTomlInstead
     implementation "com.google.protobuf:protobuf-javalite:4.33.2"
+    implementation "androidx.navigation:navigation-fragment:2.7.7"
+    implementation "androidx.navigation:navigation-ui:2.7.7"
     implementation libs.annotation
     implementation libs.lifecycle.livedata.ktx
     implementation libs.lifecycle.viewmodel.ktx

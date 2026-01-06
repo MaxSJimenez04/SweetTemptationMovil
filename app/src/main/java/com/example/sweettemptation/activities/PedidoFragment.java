@@ -29,7 +29,7 @@ import com.example.sweettemptation.utils.Constantes;
 
 import java.util.Collections;
 
-public class pedido extends Fragment {
+public class PedidoFragment extends Fragment {
 
     private PedidoViewModel mViewModel;
 
@@ -39,10 +39,6 @@ public class pedido extends Fragment {
     private Pedido pedidoActual;
     private RecyclerView recycler;
     private DetallesProductoAdapter adapter;
-
-    public static pedido newInstance() {
-        return new pedido();
-    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,

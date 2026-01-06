@@ -13,5 +13,8 @@
     <string name="txtSinProductos">No hay productos seleccionados.\nEmpieza seleccionando un producto</string>
     <string name="btnProductos">Productos</string>
     <string name="txtRangoFechas">Rango seleccionado: </string>
+    <string name="MasVendidosHeader">Más vendidos</string>
+    <string name="MenosVendidosHeader">Menos vendidos</string>
+    <string name="seleccionarEstadisticasTitulo">Seleccionar Estadisticas</string>
 
 </resources>
