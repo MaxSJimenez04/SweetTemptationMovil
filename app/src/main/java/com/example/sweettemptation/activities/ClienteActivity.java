@@ -39,7 +39,6 @@ public class ClienteActivity extends AppCompatActivity {
     }
 
     private void configurarMenus() {
-        // Menú superior - Cuenta
         binding.abTop.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.btnCuenta) {
                 mostrarMenuCuenta();
@@ -55,17 +54,9 @@ public class ClienteActivity extends AppCompatActivity {
                 Toast.makeText(this, "Historial próximamente", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (id == R.id.btnCarrito) {
-                Fragment actual = getSupportFragmentManager().findFragmentById(R.id.nav_host);
-                if (!(actual instanceof PedidoFragment)) {
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.nav_host, new PedidoFragment())
-                            .addToBackStack(null)
-                            .commit();
-                }
+                reemplazarFragmento(new pedido());
                 return true;
             } else if (id == R.id.btnProductos) {
-                // ENLACE A TU CATÁLOGO
                 reemplazarFragmento(new CatalogoProductosClienteFragment());
                 return true;
             }
