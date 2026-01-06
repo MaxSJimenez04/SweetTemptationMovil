@@ -27,79 +27,94 @@ public class AdminActivity extends AppCompatActivity {
         
         binding = ActivityAdminBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        configurarMenus();
+        configurarFab();
+    }
 
-        // Configurar barras del sistema con modo inmersivo
-        configurarBarrasSistema();
-
-        tokenStorage = new TokenStorage(this);
-
-        // Mostrar datos del usuario
-        mostrarDatosUsuario();
-
-        // Configurar botones
-        configurarBotones();
-
-        // Escuchar cuando regresas de un fragmento para volver a mostrar la bienvenida
-        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-                mostrarBienvenida(true);
+    private void configurarMenus() {
+        binding.abTop.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.btnCuenta) {
+                mostrarMenuCuenta();
+                return true;
             }
+            return false;
+        });
+
+        // Menú inferior
+        binding.abBottom.setOnMenuItemClickListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.btnEstadisticas) {
+                //TODO: cambiar a fragment seleccionar estadisticas
+                return true;
+            } else if (id == R.id.btnCuentas) {
+                //TODO: cambiar a fragment de gestionar cuentas
+                return true;
+            } else if (id == R.id.btnProductos) {
+                reemplazarFragmento(new CatalogoProductosClienteFragment());
+                return true;
+            }
+            return false;
         });
     }
 
-    private void mostrarDatosUsuario() {
+    private void configurarFab() {
+        binding.btnMenu.setOnClickListener(v -> mostrarMenuPrincipal());
+    }
+
+    private void mostrarMenuPrincipal() {
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        String nombre = prefs.getString("user_nombre", "Administrador");
-        String rol = prefs.getString("user_rol", "Administrador");
+        String nombre = prefs.getString("user_nombre", "Usuario");
 
-        binding.tvBienvenida.setText("Bienvenido, " + nombre);
-        binding.tvRol.setText("Rol: " + rol);
+        String[] opciones = {"Ver Catálogo", "Ver estadísticas", "Cuentas", "Mi Perfil", "Cerrar Sesión"};
+
+        new AlertDialog.Builder(this)
+                .setTitle("Hola, " + nombre)
+                .setItems(opciones, (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            reemplazarFragmento(new CatalogoProductosClienteFragment());
+                            break;
+                        case 1:
+                            //Todo: cambiar a seleccionar estadisticas
+                            break;
+                        case 2:
+                            //TODO: cambiar a gestionar cuentas
+                            break;
+                        case 3:
+                            Toast.makeText(this, "Perfil próximamente", Toast.LENGTH_SHORT).show();
+                            break;
+                        case 4:
+                            confirmarCerrarSesion();
+                            break;
+                    }
+                })
+                .show();
     }
 
-    private void configurarBotones() {
-        // Botón Gestionar Cuentas
-        binding.btnUsuarios.setOnClickListener(v -> {
-            Intent intent = new Intent(this, UsuariosActivity.class);
-            startActivity(intent);
-        });
+    private void reemplazarFragmento(Fragment fragmento) {
+        Fragment actual = getSupportFragmentManager().findFragmentById(R.id.nav_host);
 
-        // Botón Gestión de Productos
-        binding.btnProductos.setOnClickListener(v -> {
-            mostrarBienvenida(false);
-            cargarFragmento(new ProductoFragment());
-        });
-
-        // Botón Ver Estadísticas
-        binding.btnEstadisticas.setOnClickListener(v -> {
-            mostrarBienvenida(false);
-            cargarFragmento(new estadisticasProducto());
-        });
-
-        // Botón Cerrar Sesión
-        binding.btnLogout.setOnClickListener(v -> confirmarCerrarSesion());
+        // Solo reemplazamos si el fragmento nuevo es distinto al que ya se ve
+        if (actual == null || !actual.getClass().equals(fragmento.getClass())) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .replace(R.id.nav_host, fragmento)
+                    .addToBackStack(null)
+                    .commit();
+        }
     }
 
-    private void cargarFragmento(Fragment fragmento) {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                .replace(R.id.fragment_container, fragmento)
-                .addToBackStack(null)
-                .commit();
-    }
-
-    private void mostrarBienvenida(boolean mostrar) {
-        int visibilidadBienvenida = mostrar ? View.VISIBLE : View.GONE;
-        int visibilidadFragment = mostrar ? View.GONE : View.VISIBLE;
-
-        // Elementos de bienvenida
-        binding.tvTitulo.setVisibility(visibilidadBienvenida);
-        binding.tvBienvenida.setVisibility(visibilidadBienvenida);
-        binding.tvRol.setVisibility(visibilidadBienvenida);
-        binding.layoutBotones.setVisibility(visibilidadBienvenida);
-
-        // Contenedor de fragmentos
-        binding.fragmentContainer.setVisibility(visibilidadFragment);
+    private void mostrarMenuCuenta() {
+        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        String nombre = prefs.getString("user_nombre", "Usuario");
+        String[] opciones = {"Mi perfil", "Cerrar sesión"};
+        new AlertDialog.Builder(this)
+                .setTitle("Hola, " + nombre)
+                .setItems(opciones, (dialog, which) -> {
+                    if (which == 0) Toast.makeText(this, "Perfil próximamente", Toast.LENGTH_SHORT).show();
+                    else if (which == 1) confirmarCerrarSesion();
+                }).show();
     }
 
     private void confirmarCerrarSesion() {
@@ -111,15 +126,10 @@ public class AdminActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void cerrarSesion() {
-        // Limpiar token
+    public void cerrarSesion() {
         tokenStorage.clear();
-
-        // Limpiar datos de usuario
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         prefs.edit().clear().apply();
-
-        // Navegar a Login y limpiar el stack
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -127,53 +137,9 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
-        // Si hay fragmentos en el back stack, dejar que el sistema los maneje
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            getSupportFragmentManager().popBackStack();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    private void configurarBarrasSistema() {
-        Window window = getWindow();
-        
-        // Establecer colores de las barras
-        window.setStatusBarColor(ContextCompat.getColor(this, R.color.black));
-        window.setNavigationBarColor(ContextCompat.getColor(this, R.color.black));
-        
-        // Modo inmersivo - barras se ocultan y aparecen con swipe
-        View decorView = window.getDecorView();
-        decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-        );
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            View decorView = getWindow().getDecorView();
-            decorView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            );
-        }
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         binding = null;
     }
+
 }
