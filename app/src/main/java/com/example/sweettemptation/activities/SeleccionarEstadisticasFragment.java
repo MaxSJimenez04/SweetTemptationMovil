@@ -1,7 +1,5 @@
 package com.example.sweettemptation.activities;
 
-import static androidx.navigation.Navigation.findNavController;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,15 +27,22 @@ public class SeleccionarEstadisticasFragment extends Fragment {
         Button btnEstadisticasProductos = view.findViewById(R.id.btnEstadisticasProductos);
         View btnRegresar = view.findViewById(R.id.btnRegresar);
 
+        // NAVEGACIÓN AL REPORTE DE VENTAS
         btnEstadisticasVentas.setOnClickListener(v -> {
-            //TODO: Navegar a estadisticasVentas
+            getParentFragmentManager().beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .replace(R.id.nav_host, new ReporteVentasFragment())
+                    .addToBackStack(null)
+                    .commit();
         });
 
         btnEstadisticasProductos.setOnClickListener(v -> {
             NavHostFragment.findNavController(this).navigate(R.id.fragmentEstadisticasProductos);
         });
+
         btnRegresar.setOnClickListener(v -> {
-            NavHostFragment.findNavController(this).popBackStack();
+            getParentFragmentManager().popBackStack();
+            //NavHostFragment.findNavController(this).popBackStack();
         });
     }
 }

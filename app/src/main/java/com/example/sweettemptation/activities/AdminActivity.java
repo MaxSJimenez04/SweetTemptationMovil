@@ -108,6 +108,20 @@ public class AdminActivity extends AppCompatActivity {
                 .show();
     }
 
+    private void reemplazarFragmento(Fragment fragmento) {
+        Fragment actual = getSupportFragmentManager().findFragmentById(R.id.nav_host);
+
+        if (actual == null || !actual.getClass().equals(fragmento.getClass())) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .replace(R.id.nav_host, fragmento)
+                    .addToBackStack(null)
+                    .commit();
+        }
+    }
+
+
     private void mostrarMenuCuenta() {
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         String nombre = prefs.getString("user_nombre", "Usuario");
