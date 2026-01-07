@@ -27,8 +27,6 @@ public class ProductoAdapter extends ListAdapter<ProductoDTO, ProductoAdapter.Vi
     private final OnProductoClickListener deleteListener;
     private final OnImageLoadListener imageListener;
     private final Map<Integer, Bitmap> imagenesCargadas = new HashMap<>();
-
-    // LISTA DE RESPALDO: Para no perder los datos al filtrar
     private List<ProductoDTO> listaCompleta = new ArrayList<>();
 
     public interface OnProductoClickListener {
@@ -46,13 +44,11 @@ public class ProductoAdapter extends ListAdapter<ProductoDTO, ProductoAdapter.Vi
         this.imageListener = imageLoad;
     }
 
-    // NUEVO MÉTODO: Se usa desde el Fragmento para cargar datos nuevos del servidor
     public void setFullList(List<ProductoDTO> list) {
         this.listaCompleta = new ArrayList<>(list);
         submitList(list);
     }
 
-    // MÉTODO DE FILTRADO: Busca por nombre
     public void filtrar(String texto) {
         if (texto == null || texto.isEmpty()) {
             submitList(new ArrayList<>(listaCompleta));
@@ -70,7 +66,6 @@ public class ProductoAdapter extends ListAdapter<ProductoDTO, ProductoAdapter.Vi
 
     public void actualizarImagen(int idProd, Bitmap bmp) {
         imagenesCargadas.put(idProd, bmp);
-        // Notificar cambio solo al item específico para ahorrar recursos
         for (int i = 0; i < getItemCount(); i++) {
             if (getItem(i).getId() == idProd) {
                 notifyItemChanged(i);

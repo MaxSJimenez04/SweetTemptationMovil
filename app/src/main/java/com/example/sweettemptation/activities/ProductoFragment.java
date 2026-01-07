@@ -33,8 +33,8 @@ public class ProductoFragment extends Fragment {
     private RecyclerView recycler;
     private ProductoAdapter adapter;
     private FloatingActionButton fabNuevo;
-    private TextView txtSinResultados; // Nuevo: Para mostrar cuando no hay matches
-    private SearchView svBuscador;     // Nuevo: El buscador
+    private TextView txtSinResultados;
+    private SearchView svBuscador;
 
     public static ProductoFragment newInstance() {
         return new ProductoFragment();
@@ -69,7 +69,6 @@ public class ProductoFragment extends Fragment {
         recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
         recycler.setAdapter(adapter);
 
-        // --- CONFIGURACIÓN DEL BUSCADOR ---
         svBuscador.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -88,7 +87,6 @@ public class ProductoFragment extends Fragment {
 
         mViewModel.getProductos().observe(getViewLifecycleOwner(), lista -> {
             if (lista != null) {
-                // IMPORTANTE: setFullList para que el buscador conozca la lista nueva
                 adapter.setFullList(lista);
                 validarListaVacia();
             }
@@ -121,7 +119,6 @@ public class ProductoFragment extends Fragment {
         mViewModel.cargarProductos();
     }
 
-    // Método para mostrar el texto "Sin resultados" si el filtro no encuentra nada
     private void validarListaVacia() {
         if (adapter.getItemCount() == 0) {
             txtSinResultados.setVisibility(View.VISIBLE);

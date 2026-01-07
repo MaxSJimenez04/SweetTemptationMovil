@@ -35,7 +35,7 @@ public class ProductoViewModel extends ViewModel {
     private final CategoriaService categoriaService;
 
     public ProductoViewModel() {
-        // Inicialización de APIs
+        // Inicialización de API
         ProductoApi pApi = ApiCliente.getInstance().retrofit().create(ProductoApi.class);
         ArchivoApi aApi = ApiCliente.getInstance().retrofit().create(ArchivoApi.class);
         CategoriaApi cApi = ApiCliente.getInstance().retrofit().create(CategoriaApi.class);
@@ -46,19 +46,16 @@ public class ProductoViewModel extends ViewModel {
         this.categoriaService = new CategoriaService(cApi);
     }
 
-    // --- GETTERS PARA LA UI ---
     public LiveData<List<ProductoDTO>> getProductos() { return productos; }
     public LiveData<List<CategoriaDTO>> getCategorias() { return categorias; }
     public LiveData<Boolean> getLoading() { return cargando; }
     public LiveData<String> getMensaje() { return mensaje; }
     public LiveData<ArchivoDTO> getImagenProducto() { return archivoProducto; }
 
-    // --- MÉTODO PARA LIMPIAR MENSAJES (CORRECCIÓN) ---
     public void limpiarMensaje() {
         mensaje.postValue(null);
     }
 
-    // --- MÉTODOS DE PRODUCTOS ---
     public void cargarProductos() {
         cargando.setValue(true);
         productoService.listarProductos(result -> {

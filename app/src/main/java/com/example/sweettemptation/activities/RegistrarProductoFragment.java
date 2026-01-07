@@ -50,7 +50,6 @@ public class RegistrarProductoFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1. Vincular vistas
         btnRegresar = view.findViewById(R.id.btnRegresar);
         txtNombre = view.findViewById(R.id.txtNombreProducto);
         txtPrecio = view.findViewById(R.id.txtPrecioUnitario);
@@ -67,7 +66,6 @@ public class RegistrarProductoFragment extends Fragment {
         configurarObservadores();
         mViewModel.cargarCategorias();
 
-        // 2. Eventos de clic con validación de salida
         btnRegresar.setOnClickListener(v -> verificarSalida());
         btnCancelar.setOnClickListener(v -> verificarSalida());
 
@@ -95,10 +93,7 @@ public class RegistrarProductoFragment extends Fragment {
         mViewModel.getMensaje().observe(getViewLifecycleOwner(), msg -> {
             if (msg != null && !msg.isEmpty()) {
                 Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
-
-                // Si el mensaje indica éxito, limpiamos y cerramos
                 if (msg.toLowerCase().contains("exitosamente") || msg.toLowerCase().contains("guardado")) {
-                    // CORRECCIÓN: Usamos el método limpiar o accedemos correctamente a la variable
                     mViewModel.limpiarMensaje();
                     cerrarFragmento();
                 }
