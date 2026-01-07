@@ -10,6 +10,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.sweettemptation.R;
 import com.example.sweettemptation.auth.TokenStorage;
@@ -31,10 +34,14 @@ public class ClienteActivity extends AppCompatActivity {
 
         configurarMenus();
         configurarFab();
+        NavHostFragment navHostFragment =
+                (NavHostFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.nav_host);
 
+        NavController navController = navHostFragment.getNavController();
         // Cargar el catálogo por defecto al iniciar la actividad
         if (savedInstanceState == null) {
-            reemplazarFragmento(new CatalogoProductosClienteFragment());
+            navController.navigate(R.id.fragmentProductosCliente);
         }
     }
 
@@ -49,15 +56,20 @@ public class ClienteActivity extends AppCompatActivity {
 
         // Menú inferior
         binding.abBottom.setOnMenuItemClickListener(item -> {
+            NavHostFragment navHostFragment =
+                    (NavHostFragment) getSupportFragmentManager()
+                            .findFragmentById(R.id.nav_host);
+
+            NavController navController = navHostFragment.getNavController();
             int id = item.getItemId();
             if (id == R.id.btnHistorial) {
                 Toast.makeText(this, "Historial próximamente", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (id == R.id.btnCarrito) {
-                reemplazarFragmento(new PedidoFragment());
+                navController.navigate(R.id.fragmentPedido);
                 return true;
             } else if (id == R.id.btnProductos) {
-                reemplazarFragmento(new CatalogoProductosClienteFragment());
+                navController.navigate(R.id.fragmentProductosCliente);
                 return true;
             }
             return false;
@@ -77,15 +89,21 @@ public class ClienteActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Hola, " + nombre)
                 .setItems(opciones, (dialog, which) -> {
+                    NavHostFragment navHostFragment =
+                            (NavHostFragment) getSupportFragmentManager()
+                                    .findFragmentById(R.id.nav_host);
+
+                    NavController navController = navHostFragment.getNavController();
                     switch (which) {
-                        case 0: // Ver Catálogo
-                            reemplazarFragmento(new CatalogoProductosClienteFragment());
+
+                        case 0:
+                            navController.navigate(R.id.fragmentProductosCliente);
                             break;
                         case 1:
                             Toast.makeText(this, "Pedidos próximamente", Toast.LENGTH_SHORT).show();
                             break;
                         case 2: // Mi Carrito
-                            reemplazarFragmento(new PedidoFragment());
+                            navController.navigate(R.id.fragmentPedido);
                             break;
                         case 3:
                             Toast.makeText(this, "Perfil próximamente", Toast.LENGTH_SHORT).show();
@@ -98,19 +116,6 @@ public class ClienteActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void reemplazarFragmento(Fragment fragmento) {
-        Fragment actual = getSupportFragmentManager().findFragmentById(R.id.nav_host);
-
-        // Solo reemplazamos si el fragmento nuevo es distinto al que ya se ve
-        if (actual == null || !actual.getClass().equals(fragmento.getClass())) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                    .replace(R.id.nav_host, fragmento)
-                    .addToBackStack(null)
-                    .commit();
-        }
-    }
 
     private void mostrarMenuCuenta() {
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);

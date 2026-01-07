@@ -11,6 +11,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.sweettemptation.R;
 import com.example.sweettemptation.auth.TokenStorage;
@@ -47,14 +50,19 @@ public class AdminActivity extends AppCompatActivity {
         // Menú inferior
         binding.abBottom.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
+            NavHostFragment navHostFragment =
+                    (NavHostFragment) getSupportFragmentManager()
+                            .findFragmentById(R.id.nav_host);
+
+            NavController navController = navHostFragment.getNavController();
             if (id == R.id.btnEstadisticas) {
-                reemplazarFragmento(new SeleccionarEstadisticasFragment());
+                navController.navigate(R.id.fragmentSeleccionarEstadisticas);
                 return true;
             } else if (id == R.id.btnCuentas) {
                 //TODO: cambiar a fragment de gestionar cuentas
                 return true;
             } else if (id == R.id.btnProductos) {
-                reemplazarFragmento(new CatalogoProductosClienteFragment());
+                navController.navigate(R.id.fragmentCatalogoProductos);
                 return true;
             }
             return false;
@@ -74,12 +82,17 @@ public class AdminActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Hola, " + nombre)
                 .setItems(opciones, (dialog, which) -> {
+                    NavHostFragment navHostFragment =
+                            (NavHostFragment) getSupportFragmentManager()
+                                    .findFragmentById(R.id.nav_host);
+
+                    NavController navController = navHostFragment.getNavController();
                     switch (which) {
                         case 0:
-                            reemplazarFragmento(new CatalogoProductosClienteFragment());
+                            navController.navigate(R.id.fragmentCatalogoProductos);
                             break;
                         case 1:
-                            reemplazarFragmento(new SeleccionarEstadisticasFragment());
+                            navController.navigate(R.id.fragmentSeleccionarEstadisticas);
                             break;
                         case 2:
                             //TODO: cambiar a gestionar cuentas
@@ -93,20 +106,6 @@ public class AdminActivity extends AppCompatActivity {
                     }
                 })
                 .show();
-    }
-
-    private void reemplazarFragmento(Fragment fragmento) {
-        Fragment actual = getSupportFragmentManager().findFragmentById(R.id.nav_host);
-
-        // Solo reemplazamos si el fragmento nuevo es distinto al que ya se ve
-        if (actual == null || !actual.getClass().equals(fragmento.getClass())) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                    .replace(R.id.nav_host, fragmento)
-                    .addToBackStack(null)
-                    .commit();
-        }
     }
 
     private void mostrarMenuCuenta() {

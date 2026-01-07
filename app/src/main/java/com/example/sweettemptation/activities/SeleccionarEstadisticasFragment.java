@@ -34,7 +34,7 @@ public class SeleccionarEstadisticasFragment extends Fragment {
         });
 
         btnEstadisticasProductos.setOnClickListener(v -> {
-            NavHostFragment.findNavController(this).navigate(R.id.action_SeleccionarEstadisticas_EstadisticasProductos);
+            NavHostFragment.findNavController(this).navigate(R.id.fragmentEstadisticasProductos);
         });
         btnRegresar.setOnClickListener(v -> {
             NavHostFragment.findNavController(this).popBackStack();
