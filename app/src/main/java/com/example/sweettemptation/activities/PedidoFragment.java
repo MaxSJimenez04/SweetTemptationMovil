@@ -1,5 +1,6 @@
 package com.example.sweettemptation.activities;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -159,9 +160,25 @@ public class PedidoFragment extends Fragment {
             }
         });
 
-        btnPagar.setOnClickListener(v -> {
+        //btnPagar.setOnClickListener(v -> {
             //TODO: borrar prueba generar ticket
-           mViewModel.descargarTicket(pedidoActual.getId());
+           //mViewModel.descargarTicket(pedidoActual.getId());
+        //});
+
+        btnPagar.setOnClickListener(v -> {
+            Pedido pedido = mViewModel.getPedidoActual().getValue();
+            java.math.BigDecimal totalBD = mViewModel.getTotalPedido().getValue();
+
+            if (pedido != null && totalBD != null) {
+                double totalDouble = totalBD.doubleValue();
+
+                Intent intent = new Intent(requireContext(), PagoFragment.class);
+                intent.putExtra("idPedido", pedido.getId());
+                intent.putExtra("totalPedido", totalDouble);
+                startActivity(intent);
+            } else {
+                Toast.makeText(requireContext(), "No hay un pedido activo", Toast.LENGTH_SHORT).show();
+            }
         });
 
         mViewModel.getProductosPedido().observe(getViewLifecycleOwner(), lista -> {
@@ -213,6 +230,16 @@ public class PedidoFragment extends Fragment {
             return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    // Al final de la clase PedidoFragment.java, antes de la última llave }
+    private double extraerMonto(String texto) {
+        try {
+            // Quita todo lo que no sea número o punto decimal
+            return Double.parseDouble(texto.replaceAll("[^\\d.]", ""));
+        } catch (Exception e) {
+            return 0.0;
         }
     }
 
