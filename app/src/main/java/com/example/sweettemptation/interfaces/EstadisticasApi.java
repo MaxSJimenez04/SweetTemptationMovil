@@ -16,7 +16,7 @@ public interface EstadisticasApi {
     //Estadisticas Ventas
 
     //Estadisticas Producto
-    @GET("estadisticas/productos")
+    @GET("estadisticas/productos/")
     Call<List<EstadisticaProductoDTO>> obtenerEstadisticasProductos(@Query("fechaInicio")LocalDate fechaInicio,
                                                                     @Query("fechaFin") LocalDate fechaFin);
     @GET("estadisticas/productos/{id}")

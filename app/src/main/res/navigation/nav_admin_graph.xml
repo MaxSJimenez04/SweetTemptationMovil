@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/nav_admin_graph">
+    android:id="@+id/nav_admin_graph"
+    app:startDestination="@id/fragmentSeleccionarEstadisticas">
 
     <fragment
         android:id="@+id/fragmentSeleccionarEstadisticas"
@@ -17,4 +18,10 @@
         android:name="com.example.sweettemptation.activities.EstadisticasProductoFragment"
         android:label="Estadisticas Productos">
     </fragment>
+
+
+    <fragment
+        android:id="@+id/fragmentCatalogoProductos"
+        android:name="com.example.sweettemptation.activities.ProductoFragment"
+        android:label="Catalogo de Productos"/>
 </navigation>
