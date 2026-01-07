@@ -11,6 +11,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -27,15 +28,16 @@ public class RegistrarProductoFragment extends Fragment {
     private Spinner cmbCategoria;
     private ImageView imgPreview;
     private ProgressBar progressCircular;
-    private Button btnRegistrar;
+    private Button btnRegistrar, btnCancelar;
+    private ImageButton btnRegresar;
     private Uri uriSeleccionada;
 
-    // Para abrir la galería y obtener la imagen
     private final ActivityResultLauncher<String> mGetContent = registerForActivityResult(
             new ActivityResultContracts.GetContent(), uri -> {
                 if (uri != null) {
                     uriSeleccionada = uri;
                     imgPreview.setImageURI(uri);
+                    imgPreview.setImageTintList(null);
                 }
             });
 
@@ -48,6 +50,8 @@ public class RegistrarProductoFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // 1. Vincular vistas
+        btnRegresar = view.findViewById(R.id.btnRegresar);
         txtNombre = view.findViewById(R.id.txtNombreProducto);
         txtPrecio = view.findViewById(R.id.txtPrecioUnitario);
         txtStock = view.findViewById(R.id.txtUnidades);
@@ -56,16 +60,19 @@ public class RegistrarProductoFragment extends Fragment {
         imgPreview = view.findViewById(R.id.imgProducto);
         progressCircular = view.findViewById(R.id.progressCircular);
         btnRegistrar = view.findViewById(R.id.btnRegistrar);
+        btnCancelar = view.findViewById(R.id.btnCancelar);
 
         mViewModel = new ViewModelProvider(requireActivity()).get(ProductoViewModel.class);
 
         configurarObservadores();
-
         mViewModel.cargarCategorias();
+
+        // 2. Eventos de clic con validación de salida
+        btnRegresar.setOnClickListener(v -> verificarSalida());
+        btnCancelar.setOnClickListener(v -> verificarSalida());
 
         view.findViewById(R.id.btnCargarImagen).setOnClickListener(v -> mGetContent.launch("image/*"));
         btnRegistrar.setOnClickListener(v -> registrar());
-        view.findViewById(R.id.btnCancelar).setOnClickListener(v -> getParentFragmentManager().popBackStack());
     }
 
     private void configurarObservadores() {
@@ -77,48 +84,54 @@ public class RegistrarProductoFragment extends Fragment {
             }
         });
 
-        // Observar estado de carga (ProgressBar)
         mViewModel.getLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            if (isLoading) {
-                progressCircular.setVisibility(View.VISIBLE);
-                btnRegistrar.setEnabled(false);
-                btnRegistrar.setAlpha(0.5f);
-            } else {
-                progressCircular.setVisibility(View.GONE);
-                btnRegistrar.setEnabled(true);
-                btnRegistrar.setAlpha(1.0f);
-            }
+            boolean loading = Boolean.TRUE.equals(isLoading);
+            progressCircular.setVisibility(loading ? View.VISIBLE : View.GONE);
+            btnRegistrar.setEnabled(!loading);
+            btnRegresar.setEnabled(!loading);
+            btnRegistrar.setAlpha(loading ? 0.5f : 1.0f);
         });
 
         mViewModel.getMensaje().observe(getViewLifecycleOwner(), msg -> {
-            if (msg != null) {
+            if (msg != null && !msg.isEmpty()) {
                 Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
-                if (msg.contains("exitosamente")) {
-                    getParentFragmentManager().popBackStack(); // Volver a la lista al tener éxito
+
+                // Si el mensaje indica éxito, limpiamos y cerramos
+                if (msg.toLowerCase().contains("exitosamente") || msg.toLowerCase().contains("guardado")) {
+                    // CORRECCIÓN: Usamos el método limpiar o accedemos correctamente a la variable
+                    mViewModel.limpiarMensaje();
+                    cerrarFragmento();
                 }
             }
         });
     }
 
-    // TODO - revisar mas validaciones
+    private void verificarSalida() {
+        String nombre = txtNombre.getText().toString().trim();
+        String desc = txtDesc.getText().toString().trim();
+        String precio = txtPrecio.getText().toString().trim();
+
+        if (!nombre.isEmpty() || !desc.isEmpty() || !precio.isEmpty() || uriSeleccionada != null) {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("¿Descartar cambios?")
+                    .setMessage("Tienes datos ingresados. Si sales ahora, perderás el progreso del registro.")
+                    .setPositiveButton("Descartar y Salir", (dialog, which) -> cerrarFragmento())
+                    .setNegativeButton("Seguir editando", null)
+                    .show();
+        } else {
+            cerrarFragmento();
+        }
+    }
+
     private void registrar() {
         String nombre = txtNombre.getText().toString().trim();
         String precioStr = txtPrecio.getText().toString().trim();
         String stockStr = txtStock.getText().toString().trim();
         String descripcion = txtDesc.getText().toString().trim();
 
-        if (nombre.isEmpty()) {
-            txtNombre.setError("Requerido");
-            return;
-        }
-        if (precioStr.isEmpty()) {
-            txtPrecio.setError("Requerido");
-            return;
-        }
-        if (stockStr.isEmpty()) {
-            txtStock.setError("Requerido");
-            return;
-        }
+        if (nombre.isEmpty()) { txtNombre.setError("Requerido"); return; }
+        if (precioStr.isEmpty()) { txtPrecio.setError("Requerido"); return; }
+        if (stockStr.isEmpty()) { txtStock.setError("Requerido"); return; }
         if (uriSeleccionada == null) {
             Toast.makeText(getContext(), "Selecciona una imagen", Toast.LENGTH_SHORT).show();
             return;
@@ -128,11 +141,6 @@ public class RegistrarProductoFragment extends Fragment {
             BigDecimal precio = new BigDecimal(precioStr);
             int unidades = Integer.parseInt(stockStr);
 
-            if (precio.compareTo(BigDecimal.ZERO) <= 0) {
-                txtPrecio.setError("Debe ser mayor a 0");
-                return;
-            }
-
             ProductoDTO p = new ProductoDTO();
             p.setNombre(nombre);
             p.setPrecio(precio);
@@ -141,14 +149,18 @@ public class RegistrarProductoFragment extends Fragment {
             p.setDisponible(true);
 
             CategoriaDTO cat = (CategoriaDTO) cmbCategoria.getSelectedItem();
-            if (cat != null) {
-                p.setCategoria(cat.getId());
-            }
+            if (cat != null) p.setCategoria(cat.getId());
 
             mViewModel.guardarProductoConImagen(p, uriSeleccionada, requireContext());
 
         } catch (NumberFormatException e) {
             Toast.makeText(getContext(), "Formato numérico inválido", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void cerrarFragmento() {
+        if (getParentFragmentManager() != null) {
+            getParentFragmentManager().popBackStack();
         }
     }
 }

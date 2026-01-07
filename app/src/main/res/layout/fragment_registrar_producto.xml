@@ -11,30 +11,51 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <TextView
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Registro de Nuevo Producto"
-            android:textColor="#FF5A8F"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp"
-            android:textAlignment="center" />
+            android:layout_marginBottom="24dp">
+
+            <ImageButton
+                android:id="@+id/btnRegresar"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Regresar"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@android:drawable/ic_menu_revert"
+                app:tint="#FF5A8F" />
+
+            <TextView
+                android:id="@+id/lblTituloRegistro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Nuevo Producto"
+                android:textColor="#FF5A8F"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Nombre"
             android:textColor="#808080"
-            android:textSize="16sp" />
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/txtNombreProducto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:hint="Ej. Pastel de Red Velvet"
             android:inputType="textCapSentences"
-            android:backgroundTint="#808080"
+            android:backgroundTint="#FF5A8F"
             android:padding="10dp" />
 
         <TextView
@@ -42,39 +63,40 @@
             android:layout_height="wrap_content"
             android:text="Descripción"
             android:textColor="#808080"
-            android:textSize="16sp"
-            android:layout_marginTop="16dp" />
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <EditText
             android:id="@+id/txtDescripcion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:hint="Detalles del producto..."
             android:inputType="textMultiLine"
             android:lines="3"
             android:gravity="top"
-            android:backgroundTint="#808080" />
+            android:backgroundTint="#FF5A8F" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Categoría"
             android:textColor="#808080"
-            android:textSize="16sp"
-            android:layout_marginTop="16dp" />
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <Spinner
             android:id="@+id/cmbCategoria"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
             android:background="@android:drawable/btn_dropdown" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="16dp"
             android:weightSum="2">
 
             <LinearLayout
@@ -88,13 +110,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Precio unitario"
-                    android:textColor="#808080" />
+                    android:textColor="#808080"
+                    android:textStyle="bold" />
 
                 <EditText
                     android:id="@+id/txtPrecioUnitario"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal"
+                    android:backgroundTint="#FF5A8F"
                     android:hint="0.00" />
             </LinearLayout>
 
@@ -109,13 +133,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Stock"
-                    android:textColor="#808080" />
+                    android:textColor="#808080"
+                    android:textStyle="bold" />
 
                 <EditText
                     android:id="@+id/txtUnidades"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="number"
+                    android:backgroundTint="#FF5A8F"
                     android:hint="0" />
             </LinearLayout>
         </LinearLayout>
@@ -127,7 +153,8 @@
             android:textColor="#808080"
             android:textSize="16sp"
             android:layout_marginTop="24dp"
-            android:textAlignment="center" />
+            android:textAlignment="center"
+            android:textStyle="bold" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="180dp"
@@ -141,42 +168,44 @@
                 android:id="@+id/imgProducto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#E0E0E0"
-                android:scaleType="centerCrop" />
+                android:background="#F0F0F0"
+                android:scaleType="centerCrop"
+                android:src="@android:drawable/ic_menu_gallery"
+                app:tint="#D1D1D1" />
         </androidx.cardview.widget.CardView>
 
         <Button
             android:id="@+id/btnCargarImagen"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="8dp"
-            android:text="Cargar Imagen"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#FF5A8F" />
+            android:text="Seleccionar Foto"
+            android:textColor="#FF5A8F" />
 
         <Button
             android:id="@+id/btnRegistrar"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginTop="32dp"
-            android:text="Registrar Producto"
+            android:text="REGISTRAR PRODUCTO"
             android:backgroundTint="#FF5A8F"
             app:cornerRadius="30dp"
-            android:textSize="18sp" />
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/btnCancelar"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginTop="12dp"
-            android:text="Cancelar"
-            android:backgroundTint="#FBA1B7"
-            app:cornerRadius="30dp"
-            android:textColor="#FFFFFF" />
+            android:text="CANCELAR"
+            android:textColor="#FF5A8F"
+            app:strokeColor="#FF5A8F"
+            app:cornerRadius="30dp" />
 
-        // para mostrar una barra de carga
         <ProgressBar
             android:id="@+id/progressCircular"
             android:layout_width="wrap_content"

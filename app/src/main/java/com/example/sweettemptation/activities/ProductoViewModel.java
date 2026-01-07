@@ -2,6 +2,7 @@ package com.example.sweettemptation.activities;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -52,6 +53,11 @@ public class ProductoViewModel extends ViewModel {
     public LiveData<String> getMensaje() { return mensaje; }
     public LiveData<ArchivoDTO> getImagenProducto() { return archivoProducto; }
 
+    // --- MÉTODO PARA LIMPIAR MENSAJES (CORRECCIÓN) ---
+    public void limpiarMensaje() {
+        mensaje.postValue(null);
+    }
+
     // --- MÉTODOS DE PRODUCTOS ---
     public void cargarProductos() {
         cargando.setValue(true);
@@ -64,6 +70,7 @@ public class ProductoViewModel extends ViewModel {
             }
         });
     }
+
     public void cargarCategorias() {
         categoriaService.listarCategorias(result -> {
             if (result.codigo == 200) {
@@ -71,6 +78,7 @@ public class ProductoViewModel extends ViewModel {
             }
         });
     }
+
     public void guardarProductoConImagen(ProductoDTO producto, Uri uri, Context context) {
         cargando.setValue(true);
         mensaje.setValue(null);
@@ -81,7 +89,7 @@ public class ProductoViewModel extends ViewModel {
                 mensaje.postValue("Producto registrado exitosamente");
                 cargarProductos();
             } else {
-                mensaje.postValue(result.mensaje);
+                mensaje.postValue(result.mensaje != null ? result.mensaje : "Error al registrar producto");
             }
         });
     }
@@ -92,10 +100,8 @@ public class ProductoViewModel extends ViewModel {
 
         productoService.eliminarProducto(idProducto, result -> {
             cargando.postValue(false);
-
             if (result.codigo == 200) {
                 mensaje.postValue("¡Producto eliminado exitosamente!");
-
                 cargarProductos();
             } else {
                 mensaje.postValue("Error: " + result.mensaje);
@@ -103,7 +109,22 @@ public class ProductoViewModel extends ViewModel {
         });
     }
 
-    // --- LÓGICA DE CARGA DE IMÁGENES (PARA LA LISTA) ---
+    public void actualizarProducto(ProductoDTO producto, Uri uri, Context context) {
+        cargando.setValue(true);
+        mensaje.setValue(null);
+
+        productoService.actualizarProducto(producto, uri, context, result -> {
+            cargando.postValue(false);
+            if (result.codigo == 200 || result.codigo == 201) {
+                mensaje.postValue("¡Producto actualizado exitosamente!");
+                cargarProductos();
+            } else {
+                mensaje.postValue(result.mensaje != null ? result.mensaje : "Error al actualizar");
+            }
+        });
+    }
+
+    // --- LÓGICA DE IMÁGENES ---
     public void obtenerRutaArchivo(int idProducto) {
         archivoService.obtenerDetallesArchivo(idProducto, result -> {
             if (result.codigo == 200 && result.datos != null) {
@@ -116,31 +137,12 @@ public class ProductoViewModel extends ViewModel {
     private void descargarImagenReal(int idArchivo, int idProducto) {
         archivoService.obtenerImagen(idArchivo, result -> {
             if (result.codigo == 200 && result.datos != null) {
-                // Obtenemos el String Base64 (JPG en texto)
                 String datosBase64 = result.datos.getDatos();
-
                 if (datosBase64 != null) {
-                    android.util.Log.d("IMAGEN_TEST", "Imagen cargada para producto: " + idProducto);
+                    Log.d("IMAGEN_TEST", "Imagen cargada para producto: " + idProducto);
                     result.datos.setIdProducto(idProducto);
                     archivoProducto.postValue(result.datos);
                 }
-            }
-        });
-    }
-
-    public void actualizarProducto(ProductoDTO producto, Uri uri, Context context) {
-        cargando.setValue(true);
-        mensaje.setValue(null);
-
-        // Llamamos al servicio de producto para realizar el PUT
-        productoService.actualizarProducto(producto, uri, context, result -> {
-            cargando.postValue(false);
-            // El código 200 indica que el servidor procesó la actualización correctamente
-            if (result.codigo == 200 || result.codigo == 201) {
-                mensaje.postValue("¡Producto actualizado exitosamente!");
-                cargarProductos(); // Refrescamos la lista general para ver los cambios
-            } else {
-                mensaje.postValue(result.mensaje);
             }
         });
     }
