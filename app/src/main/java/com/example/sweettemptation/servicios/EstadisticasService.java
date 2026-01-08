@@ -70,9 +70,9 @@ public class EstadisticasService {
     }
 
     public Call<List<EstadisticaVentaProductoDTO>> obtenerVentaProducto(int idProducto,
-                                                                        LocalDate fechaInicio, LocalDate fechaFin,
+                                                                        String fechaInicio, String fechaFin,
                                                                         ResultCallback<List<EstadisticaVentaProductoDTO>> cb) {
-        Call<List<EstadisticaVentaProductoDTO>> call = api.obtenerVentasProducto(idProducto, fechaInicio, fechaFin);
+        Call<List<EstadisticaVentaProductoDTO>> call = api.obtenerVentasProducto(idProducto, fechaInicio, fechaFin, idProducto);
         call.enqueue(new Callback<List<EstadisticaVentaProductoDTO>>() {
             @Override
             public void onResponse(Call<List<EstadisticaVentaProductoDTO>> call, Response<List<EstadisticaVentaProductoDTO>> response) {

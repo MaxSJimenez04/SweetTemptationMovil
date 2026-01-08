@@ -16,6 +16,7 @@ import com.example.sweettemptation.servicios.ProductoService;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import retrofit2.Call;
@@ -72,17 +73,19 @@ public class EstadisticasProductoViewModel extends ViewModel {
     }
     public void obtenerFechasRango(String rangoSeleccionado){
         LocalDate hoy = LocalDate.now();
-        rango.setValue(new RangoFechas(hoy.minusDays(6), hoy));
         switch (rangoSeleccionado){
             case "Semana pasada":
                   rango.postValue(new RangoFechas(hoy.minusDays(6), hoy));
+                  break;
             case "Quincena pasada":
                  rango.postValue(new RangoFechas(hoy.minusDays(14), hoy));
+                 break;
             case "Mes pasado":
                 YearMonth mes = YearMonth.from(hoy).minusMonths(1);
                 LocalDate inicio = mes.atDay(1);
                 LocalDate fin = mes.atEndOfMonth();
-                 rango.postValue(new RangoFechas(inicio,fin));
+                rango.postValue(new RangoFechas(inicio,fin));
+                break;
             default:
                  rango.postValue(new RangoFechas(hoy.minusDays(6), hoy));
         }
@@ -116,8 +119,11 @@ public class EstadisticasProductoViewModel extends ViewModel {
     public void consultarVentasPorProducto(int idProducto, LocalDate fechaInicio, LocalDate fechaFin){
         cargando.setValue(true);
         mensaje.setValue(null);
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
+        String fechaInicioParseada = fechaInicio.format(formatter);
+        String fechaFinParseada = fechaFin.format(formatter);
         Call<List<EstadisticaVentaProductoDTO>> callServicio = estadisticasService.obtenerVentaProducto(idProducto,
-                fechaInicio, fechaFin, new EstadisticasService.ResultCallback<List<EstadisticaVentaProductoDTO>>() {
+                fechaInicioParseada, fechaFinParseada, new EstadisticasService.ResultCallback<List<EstadisticaVentaProductoDTO>>() {
                     @Override
                     public void onResult(ApiResult<List<EstadisticaVentaProductoDTO>> result) {
                        if (result.codigo == 200){

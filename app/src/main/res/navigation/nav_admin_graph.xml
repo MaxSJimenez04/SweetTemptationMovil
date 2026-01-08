@@ -22,6 +22,12 @@
         android:label="Estadisticas Productos">
     </fragment>
 
+    <fragment
+        android:id="@+id/fragmentEstadisticasVentas"
+        android:name="com.example.sweettemptation.activities.ReporteVentasFragment"
+        android:label="Estadisticas Ventas"
+        />
+
 
     <fragment
         android:id="@+id/fragmentCatalogoProductos"
