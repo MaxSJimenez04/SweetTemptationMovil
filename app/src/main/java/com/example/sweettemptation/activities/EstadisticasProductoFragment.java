@@ -130,13 +130,17 @@ public class EstadisticasProductoFragment extends Fragment {
             ejeX.setPosition(XAxis.XAxisPosition.BOTTOM);
             ejeX.setValueFormatter(new IndexAxisValueFormatter(xValues));
             ejeX.setGranularity(1f);
+            ejeX.setLabelRotationAngle(-45f);
+            ejeX.setDrawGridLines(false);
+            ejeX.setLabelCount(Math.min(xValues.size(), 5), true);
+
 
             YAxis ejeY = lcGrafica.getAxisLeft();
             ejeY.setAxisMinimum(0f);
-            ejeY.setAxisMinimum(50f);
-            ejeY.setAxisLineWidth(2f);
-            ejeY.setAxisLineColor(Color.BLACK);
-            ejeY.setLabelCount(10);
+            ejeY.setDrawGridLines(false);
+            ejeY.setLabelCount(6, true);
+
+            lcGrafica.getAxisRight().setEnabled(false);
 
             List<Entry> entries = new ArrayList<>();
 
@@ -154,6 +158,7 @@ public class EstadisticasProductoFragment extends Fragment {
 
             LineData lineData = new LineData(dataSet);
             lcGrafica.setData(lineData);
+            lcGrafica.animateX(800);
             lcGrafica.invalidate();
         });
 
@@ -190,7 +195,6 @@ public class EstadisticasProductoFragment extends Fragment {
                 cbProducto.setEnabled(true);
                 String seleccion = parent.getItemAtPosition(position).toString();
                 tvRangoSeleccionado.setText(seleccion);
-
                 mViewModel.obtenerFechasRango(seleccion);
             }
 
@@ -207,12 +211,13 @@ public class EstadisticasProductoFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 ProductoDTO productoSeleccionado = (ProductoDTO) parent.getItemAtPosition(position);
                 EstadisticasProductoViewModel.RangoFechas rango = mViewModel.getRango().getValue();
-                mViewModel.consultarVentasPorProducto(productoSeleccionado.getId(), rango.inicio, rango.fin);
 
+                mViewModel.consultarVentasPorProducto(productoSeleccionado.getId(), rango.inicio, rango.fin);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+                mViewModel.mensaje.postValue("Sin producto seleccionado");
             }
         });
 

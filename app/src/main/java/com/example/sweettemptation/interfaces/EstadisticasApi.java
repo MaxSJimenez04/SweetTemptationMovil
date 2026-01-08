@@ -37,8 +37,8 @@ public interface EstadisticasApi {
     Call<List<EstadisticaProductoDTO>> obtenerEstadisticasProductos(@Query("fechaInicio")LocalDate fechaInicio,
                                                                     @Query("fechaFin") LocalDate fechaFin);
     @GET("estadisticas/productos/{id}")
-    Call<List<EstadisticaVentaProductoDTO>> obtenerVentasProducto(@Path("id") int idProducto,
-                                                                  @Query("fechaInicio") LocalDate fechaInicio,
-                                                                  @Query("fechaFin") LocalDate fechaFin);
+    Call<List<EstadisticaVentaProductoDTO>> obtenerVentasProducto(@Path("id") int id,
+                                                                  @Query("fechaInicio") String fechaInicio,
+                                                                  @Query("fechaFin") String fechaFin, @Query("idProducto") int idProducto);
 
 }

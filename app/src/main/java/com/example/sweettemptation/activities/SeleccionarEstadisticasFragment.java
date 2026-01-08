@@ -27,13 +27,8 @@ public class SeleccionarEstadisticasFragment extends Fragment {
         Button btnEstadisticasProductos = view.findViewById(R.id.btnEstadisticasProductos);
         View btnRegresar = view.findViewById(R.id.btnRegresar);
 
-        // NAVEGACIÓN AL REPORTE DE VENTAS
         btnEstadisticasVentas.setOnClickListener(v -> {
-            getParentFragmentManager().beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                    .replace(R.id.nav_host, new ReporteVentasFragment())
-                    .addToBackStack(null)
-                    .commit();
+            NavHostFragment.findNavController(this).navigate(R.id.fragmentEstadisticasVentas);
         });
 
         btnEstadisticasProductos.setOnClickListener(v -> {
@@ -42,7 +37,6 @@ public class SeleccionarEstadisticasFragment extends Fragment {
 
         btnRegresar.setOnClickListener(v -> {
             getParentFragmentManager().popBackStack();
-            //NavHostFragment.findNavController(this).popBackStack();
         });
     }
 }
