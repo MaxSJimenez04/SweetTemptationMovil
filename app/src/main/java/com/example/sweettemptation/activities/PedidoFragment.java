@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,6 +27,8 @@ import com.example.sweettemptation.R;
 import com.example.sweettemptation.dto.ArchivoDTO;
 import com.example.sweettemptation.dto.DetallesProductoDTO;
 import com.example.sweettemptation.model.Pedido;
+import com.example.sweettemptation.model.ProductoPedido;
+import com.example.sweettemptation.servicios.ProductoPedidoService;
 import com.example.sweettemptation.utils.Constantes;
 
 import java.util.Collections;
@@ -112,6 +115,7 @@ public class PedidoFragment extends Fragment {
                 txtSinProducto.setVisibility(View.VISIBLE);
                 btnProductos.setVisibility(View.VISIBLE);
                 recycler.setVisibility(View.GONE);
+                mViewModel.crearPedido(idCliente);
                 return;
             }
 
@@ -142,7 +146,7 @@ public class PedidoFragment extends Fragment {
             btnEditar.setVisibility(View.VISIBLE);
         });
         btnProductos.setOnClickListener(v -> {
-            //TODO: navegar a página productos
+            NavHostFragment.findNavController(this).navigate(R.id.fragmentProductosCliente);
         });
 
         // Eventos UI
@@ -150,6 +154,7 @@ public class PedidoFragment extends Fragment {
             mViewModel.cancelarPedido(pedidoActual.getId(), idCliente);
         });
 
+        //TODO: borrar prueba generar ticket
         //Empieza grpc
         mViewModel.init(requireContext());
         mViewModel.ticketDescargado.observe(getViewLifecycleOwner(), uri -> {
@@ -159,26 +164,14 @@ public class PedidoFragment extends Fragment {
                         Toast.LENGTH_LONG).show();
             }
         });
+        btnPagar.setOnClickListener(v -> {
+           mViewModel.descargarTicket(pedidoActual.getId());
+        });
 
-        //btnPagar.setOnClickListener(v -> {
-            //TODO: borrar prueba generar ticket
-           //mViewModel.descargarTicket(pedidoActual.getId());
-        //});
 
         btnPagar.setOnClickListener(v -> {
-            Pedido pedido = mViewModel.getPedidoActual().getValue();
-            java.math.BigDecimal totalBD = mViewModel.getTotalPedido().getValue();
-
-            if (pedido != null && totalBD != null) {
-                double totalDouble = totalBD.doubleValue();
-
-                Intent intent = new Intent(requireContext(), PagoFragment.class);
-                intent.putExtra("idPedido", pedido.getId());
-                intent.putExtra("totalPedido", totalDouble);
-                startActivity(intent);
-            } else {
-                Toast.makeText(requireContext(), "No hay un pedido activo", Toast.LENGTH_SHORT).show();
-            }
+            //TODO:
+           //NavHostFragment.findNavController(this).navigate(ID_FRAGMENT_PAGO);
         });
 
         mViewModel.getProductosPedido().observe(getViewLifecycleOwner(), lista -> {
@@ -232,15 +225,4 @@ public class PedidoFragment extends Fragment {
             return null;
         }
     }
-
-    // Al final de la clase PedidoFragment.java, antes de la última llave }
-    private double extraerMonto(String texto) {
-        try {
-            // Quita todo lo que no sea número o punto decimal
-            return Double.parseDouble(texto.replaceAll("[^\\d.]", ""));
-        } catch (Exception e) {
-            return 0.0;
-        }
-    }
-
 }

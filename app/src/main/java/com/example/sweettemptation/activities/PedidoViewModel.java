@@ -1,6 +1,8 @@
 package com.example.sweettemptation.activities;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -171,7 +173,6 @@ public class PedidoViewModel extends ViewModel {
             cargando.postValue(false);
             if (result.codigo == 200){
                 pedidoActual.postValue(null);
-               crearPedido(idCliente);
            }else{
                mensaje.postValue(result.mensaje);
            }
