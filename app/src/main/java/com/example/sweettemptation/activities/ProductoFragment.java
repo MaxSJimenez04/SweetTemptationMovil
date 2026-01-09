@@ -83,7 +83,7 @@ public class ProductoFragment extends Fragment {
             }
         });
 
-        // --- OBSERVADORES ---
+        // Observadores
 
         mViewModel.getProductos().observe(getViewLifecycleOwner(), lista -> {
             if (lista != null) {
@@ -140,20 +140,16 @@ public class ProductoFragment extends Fragment {
     }
 
     private void abrirFormularioRegistro() {
-        getParentFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, new RegistrarProductoFragment())
-                .addToBackStack(null)
-                .commit();
+        androidx.navigation.Navigation.findNavController(requireView())
+                .navigate(R.id.fragmentRegistrarProducto); // ID definido en tu nav_graph
     }
 
     private void abrirFormularioEditar(ProductoDTO producto) {
-        DetalleProductoFragment detalleFrag = DetalleProductoFragment.newInstance(producto);
-        getParentFragmentManager().beginTransaction()
-                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out,
-                        android.R.anim.fade_in, android.R.anim.fade_out)
-                .replace(R.id.fragment_container, detalleFrag)
-                .addToBackStack(null)
-                .commit();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("producto", producto);
+
+        androidx.navigation.Navigation.findNavController(requireView())
+                .navigate(R.id.fragmentDetalleProducto, bundle); // ID definido en tu nav_graph
     }
 
     private Bitmap convertirArchivoABitmap(ArchivoDTO archivo) {

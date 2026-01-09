@@ -3,16 +3,11 @@ package com.example.sweettemptation.activities;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
-import android.view.Window;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.sweettemptation.R;
@@ -23,17 +18,23 @@ public class AdminActivity extends AppCompatActivity {
 
     private ActivityAdminBinding binding;
     private TokenStorage tokenStorage;
+    private NavController navController; // Definirlo como variable global
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         binding = ActivityAdminBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        
-        // Inicializar TokenStorage (necesario para cerrar sesión)
+
         tokenStorage = new TokenStorage(this);
-        
+
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host);
+        if (navHostFragment != null) {
+            navController = navHostFragment.getNavController();
+        }
+
         configurarMenus();
         configurarFab();
     }
@@ -47,19 +48,15 @@ public class AdminActivity extends AppCompatActivity {
             return false;
         });
 
-        // Menú inferior
         binding.abBottom.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
-            NavHostFragment navHostFragment =
-                    (NavHostFragment) getSupportFragmentManager()
-                            .findFragmentById(R.id.nav_host);
+            if (navController == null) return false;
 
-            NavController navController = navHostFragment.getNavController();
             if (id == R.id.btnEstadisticas) {
                 navController.navigate(R.id.fragmentSeleccionarEstadisticas);
                 return true;
             } else if (id == R.id.btnCuentas) {
-                //TODO: cambiar a fragment de gestionar cuentas
+                // TODO: Navegar a gestión de cuentas
                 return true;
             } else if (id == R.id.btnProductos) {
                 navController.navigate(R.id.fragmentCatalogoProductos);
@@ -82,11 +79,8 @@ public class AdminActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Hola, " + nombre)
                 .setItems(opciones, (dialog, which) -> {
-                    NavHostFragment navHostFragment =
-                            (NavHostFragment) getSupportFragmentManager()
-                                    .findFragmentById(R.id.nav_host);
+                    if (navController == null) return;
 
-                    NavController navController = navHostFragment.getNavController();
                     switch (which) {
                         case 0:
                             navController.navigate(R.id.fragmentCatalogoProductos);
@@ -95,7 +89,7 @@ public class AdminActivity extends AppCompatActivity {
                             navController.navigate(R.id.fragmentSeleccionarEstadisticas);
                             break;
                         case 2:
-                            //TODO: cambiar a gestionar cuentas
+                            // TODO: Navegar a cuentas
                             break;
                         case 3:
                             Toast.makeText(this, "Perfil próximamente", Toast.LENGTH_SHORT).show();
@@ -107,20 +101,6 @@ public class AdminActivity extends AppCompatActivity {
                 })
                 .show();
     }
-
-    private void reemplazarFragmento(Fragment fragmento) {
-        Fragment actual = getSupportFragmentManager().findFragmentById(R.id.nav_host);
-
-        if (actual == null || !actual.getClass().equals(fragmento.getClass())) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                    .replace(R.id.nav_host, fragmento)
-                    .addToBackStack(null)
-                    .commit();
-        }
-    }
-
 
     private void mostrarMenuCuenta() {
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
@@ -158,5 +138,4 @@ public class AdminActivity extends AppCompatActivity {
         super.onDestroy();
         binding = null;
     }
-
 }
