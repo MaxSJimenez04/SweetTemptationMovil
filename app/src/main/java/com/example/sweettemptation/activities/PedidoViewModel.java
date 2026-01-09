@@ -141,7 +141,11 @@ public class PedidoViewModel extends ViewModel {
                                 dto.getTotal(), dto.getEstado(), dto.getPersonalizado(), dto.getIdCliente());
                         pedidoActual.postValue(p);
                     }
-                } else {
+                } else{
+                    if (result.codigo == 404){
+                        crearPedido(idCliente);
+                        return;
+                    }
                     mensaje.postValue(result.mensaje != null ? result.mensaje : ("Error " + result.codigo));
                 }
 
