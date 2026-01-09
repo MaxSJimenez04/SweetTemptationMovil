@@ -1,13 +1,11 @@
 package com.example.sweettemptation.activities;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Base64;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,9 +26,8 @@ import com.example.sweettemptation.R;
 import com.example.sweettemptation.dto.ArchivoDTO;
 import com.example.sweettemptation.dto.DetallesProductoDTO;
 import com.example.sweettemptation.model.Pedido;
-import com.example.sweettemptation.model.ProductoPedido;
-import com.example.sweettemptation.servicios.ProductoPedidoService;
 import com.example.sweettemptation.utils.Constantes;
+import com.example.sweettemptation.utils.UserSession;
 
 import java.util.Collections;
 
@@ -40,7 +37,7 @@ public class PedidoFragment extends Fragment {
 
     private ProgressBar progress;
     private TextView tvSubtotal, tvTotal, tvIva;
-    private int idCliente = 3;
+    private int idCliente;
     private Pedido pedidoActual;
     private RecyclerView recycler;
     private DetallesProductoAdapter adapter;
@@ -54,6 +51,8 @@ public class PedidoFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        idCliente = UserSession.getUserId(requireContext());
 
         // Views del layout
         progress = view.findViewById(R.id.pbProgreso);
@@ -88,9 +87,6 @@ public class PedidoFragment extends Fragment {
 
 
         mViewModel.cargarPedidoActual(idCliente);
-
-//        SharedPreferences prefs = Objects.requireNonNull(getContext()).getSharedPreferences("user_prefs", MODE_PRIVATE);
-//        idCliente = prefs.getInt("user_id", 3);
 
         adapter = new DetallesProductoAdapter(
                 item -> {
