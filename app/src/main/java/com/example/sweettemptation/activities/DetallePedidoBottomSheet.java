@@ -23,6 +23,7 @@ import com.example.sweettemptation.model.Pedido;
 import com.example.sweettemptation.network.ApiCliente;
 import com.example.sweettemptation.servicios.PedidoService;
 import com.example.sweettemptation.servicios.ProductoPedidoService;
+import com.example.sweettemptation.utils.UserSession;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.math.BigDecimal;
@@ -33,6 +34,7 @@ public class DetallePedidoBottomSheet extends BottomSheetDialogFragment {
     private ProductoDTO producto;
     private Bitmap imagenBitmap;
     private int cantidad = 1;
+    private int idCliente;
     private static PedidoService pedidoService;
     private static ProductoPedidoService productoPedidoService;
     private TextView txtCantidad, txtTotal, txtNombre, txtDescripcion;
@@ -105,7 +107,8 @@ public class DetallePedidoBottomSheet extends BottomSheetDialogFragment {
         });
 
         btnAgregar.setOnClickListener(v -> {
-            pedidoService.obtenerPedidoActual(3, result -> {
+            idCliente = UserSession.getUserId(requireContext());
+            pedidoService.obtenerPedidoActual(idCliente, result -> {
                 String mensaje;
                 if (result == null) {
                     mensaje = "Pedido no encontrado";

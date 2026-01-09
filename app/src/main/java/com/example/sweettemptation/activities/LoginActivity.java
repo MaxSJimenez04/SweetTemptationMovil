@@ -23,6 +23,7 @@ import com.example.sweettemptation.dto.LoginResponse;
 import com.example.sweettemptation.interfaces.AuthApi;
 import com.example.sweettemptation.network.ApiCliente;
 import com.example.sweettemptation.utils.Constantes;
+import com.example.sweettemptation.utils.UserSession;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -107,8 +108,9 @@ public class LoginActivity extends AppCompatActivity {
                     
                     // Guardar token y datos del usuario
                     tokenStorage.saveToken(loginResponse.getToken());
-                    guardarDatosUsuario(loginResponse);
-                    
+                    UserSession.save(LoginActivity.this, loginResponse);
+
+
                     // Navegar según el rol
                     navegarSegunRol(loginResponse.getRol());
                     
@@ -144,16 +146,6 @@ public class LoginActivity extends AppCompatActivity {
         binding.etPassword.setEnabled(!mostrar);
     }
 
-    private void guardarDatosUsuario(LoginResponse response) {
-        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        prefs.edit()
-                .putInt("user_id", response.getId())
-                .putString("user_nombre", response.getNombre())
-                .putString("user_correo", response.getCorreo())
-                .putString("user_telefono", response.getTelefono())
-                .putString("user_rol", response.getRol())
-                .apply();
-    }
 
     private void navegarSegunRol(String rol) {
         Intent intent;
