@@ -34,4 +34,14 @@
         android:name="com.example.sweettemptation.activities.ProductoFragment"
         android:label="Catalogo de Productos"/>
 
+    <fragment
+        android:id="@+id/fragmentRegistrarProducto"
+        android:name="com.example.sweettemptation.activities.RegistrarProductoFragment"
+        android:label="Registrar Producto" />
+
+    <fragment
+        android:id="@+id/fragmentDetalleProducto"
+        android:name="com.example.sweettemptation.activities.DetalleProductoFragment"
+        android:label="Detalle de Producto" />
+
 </navigation>

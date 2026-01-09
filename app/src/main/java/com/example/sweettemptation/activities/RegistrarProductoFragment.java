@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -14,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation; // Importante
 
 import com.example.sweettemptation.R;
 import com.example.sweettemptation.dto.CategoriaDTO;
@@ -71,6 +73,13 @@ public class RegistrarProductoFragment extends Fragment {
 
         view.findViewById(R.id.btnCargarImagen).setOnClickListener(v -> mGetContent.launch("image/*"));
         btnRegistrar.setOnClickListener(v -> registrar());
+
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                verificarSalida();
+            }
+        });
     }
 
     private void configurarObservadores() {
@@ -154,8 +163,12 @@ public class RegistrarProductoFragment extends Fragment {
     }
 
     private void cerrarFragmento() {
-        if (getParentFragmentManager() != null) {
-            getParentFragmentManager().popBackStack();
+        try {
+            Navigation.findNavController(requireView()).popBackStack();
+        } catch (IllegalStateException e) {
+            if (getParentFragmentManager() != null) {
+                getParentFragmentManager().popBackStack();
+            }
         }
     }
 }
