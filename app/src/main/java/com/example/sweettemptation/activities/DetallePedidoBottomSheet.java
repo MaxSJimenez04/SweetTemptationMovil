@@ -107,34 +107,7 @@ public class DetallePedidoBottomSheet extends BottomSheetDialogFragment {
         });
 
         btnAgregar.setOnClickListener(v -> {
-            idCliente = UserSession.getUserId(requireContext());
-            pedidoService.obtenerPedidoActual(idCliente, result -> {
-                String mensaje;
-                if (result == null) {
-                    mensaje = "Pedido no encontrado";
-                    Toast.makeText(getContext(), mensaje, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (result.codigo == 200) {
-                    if (result.datos == null) {
-                        mensaje = "No se encontró pedido actual";
-                        Toast.makeText(getContext(), mensaje, Toast.LENGTH_SHORT).show();
-                    } else {
-                        PedidoDTO dto = result.datos;
-                        Pedido p = new Pedido(dto.getId(), dto.getFechaCompra(), dto.getActual(),
-                                dto.getTotal(), dto.getEstado(), dto.getPersonalizado(), dto.getIdCliente());
-                        productoPedidoService.crearProducto(producto.getId(), p.getId(), cantidad, respuesta -> {
-                            if (respuesta.codigo == 200){
-                                String confirmacion = "Agregado: " + cantidad + " " + producto.getNombre();
-                                Toast.makeText(getContext(), confirmacion, Toast.LENGTH_SHORT).show();
-                                dismiss();
-                            }else {
-                                Toast.makeText(getContext(), "Hubo un problema: " + respuesta.mensaje, Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                }
-            });
+            iniciarAgregarProducto();
         });
     }
     private void actualizarCalculos() {
@@ -142,4 +115,91 @@ public class DetallePedidoBottomSheet extends BottomSheetDialogFragment {
         BigDecimal total = producto.getPrecio().multiply(new BigDecimal(cantidad));
         txtTotal.setText(String.format(Locale.getDefault(), "$%.2f", total));
     }
+
+    private void iniciarAgregarProducto() {
+        int idCliente = UserSession.getUserId(requireContext());
+        obtenerPedidoActual(idCliente);
+    }
+
+
+    private void obtenerPedidoActual(int idCliente) {
+        pedidoService.obtenerPedidoActual(idCliente, result -> {
+
+            if (result.codigo == 200 && result.datos != null) {
+                Pedido pedido = mapearPedido(result.datos);
+                agregarProductoAPedido(pedido);
+
+            } else {
+                crearPedidoYAgregarProducto(idCliente);
+            }
+        });
+    }
+
+    private void crearPedidoYAgregarProducto(int idCliente) {
+        pedidoService.crearPedido(idCliente, resultado -> {
+
+            if (resultado.codigo == 201) {
+                obtenerPedidoActualDespuesDeCrear(idCliente);
+            } else {
+                Toast.makeText(
+                        getContext(),
+                        "Hubo un problema al crear el pedido: " + resultado.mensaje,
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
+    }
+
+    private void obtenerPedidoActualDespuesDeCrear(int idCliente) {
+        pedidoService.obtenerPedidoActual(idCliente, result -> {
+
+            if (result.codigo == 200 && result.datos != null) {
+                Pedido pedido = mapearPedido(result.datos);
+                agregarProductoAPedido(pedido);
+            } else {
+                Toast.makeText(
+                        getContext(),
+                        "No se pudo recuperar el pedido recién creado",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
+    }
+
+
+    private void agregarProductoAPedido(Pedido pedido) {
+        productoPedidoService.crearProducto(
+                producto.getId(),
+                pedido.getId(),
+                cantidad,
+                respuesta -> {
+
+                    if (respuesta.codigo == 200) {
+                        String confirmacion = "Agregado: " + cantidad + " " + producto.getNombre();
+                        Toast.makeText(getContext(), confirmacion, Toast.LENGTH_SHORT).show();
+                        dismiss();
+                    } else {
+                        Toast.makeText(
+                                getContext(),
+                                "Hubo un problema: " + respuesta.mensaje,
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                }
+        );
+    }
+
+    private Pedido mapearPedido(PedidoDTO dto) {
+        return new Pedido(
+                dto.getId(),
+                dto.getFechaCompra(),
+                dto.getActual(),
+                dto.getTotal(),
+                dto.getEstado(),
+                dto.getPersonalizado(),
+                dto.getIdCliente()
+        );
+    }
+
+
 }
