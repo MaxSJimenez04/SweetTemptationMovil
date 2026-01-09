@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -115,10 +116,8 @@ public class PedidoFragment extends Fragment {
                 txtSinProducto.setVisibility(View.VISIBLE);
                 btnProductos.setVisibility(View.VISIBLE);
                 recycler.setVisibility(View.GONE);
-                mViewModel.crearPedido(idCliente);
                 return;
             }
-
             pedidoActual = pedido;
 
             mViewModel.consultarProductosPedido(pedidoActual.getId());
@@ -175,6 +174,7 @@ public class PedidoFragment extends Fragment {
         });
 
         mViewModel.getProductosPedido().observe(getViewLifecycleOwner(), lista -> {
+
             if (!lista.isEmpty()) {
                 btnProductos.setVisibility(View.GONE);
                 txtSinProducto.setVisibility(View.GONE);

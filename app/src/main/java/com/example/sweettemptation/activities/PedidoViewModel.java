@@ -173,6 +173,10 @@ public class PedidoViewModel extends ViewModel {
             cargando.postValue(false);
             if (result.codigo == 200){
                 pedidoActual.postValue(null);
+                productosPedido.postValue(Collections.emptyList());
+                subtotalPedido.postValue(BigDecimal.ZERO);
+                subtotalPedido.postValue(BigDecimal.ZERO);
+                crearPedido(idCliente);
            }else{
                mensaje.postValue(result.mensaje);
            }
