@@ -95,13 +95,37 @@
                         android:visibility="gone"
                         android:layout_marginStart="32dp">
 
-                        <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Nombre en la tarjeta" />
-                        <EditText android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Número de tarjeta" android:inputType="number" />
+                        <EditText
+                            android:id="@+id/etNombreTarjeta"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Nombre en la tarjeta"
+                            android:inputType="textCapWords" />
 
-                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                            <EditText android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:hint="MM/AA" />
-                            <EditText android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:hint="CVV" android:inputType="numberPassword" />
-                        </LinearLayout>
+                        <EditText
+                            android:id="@+id/etNumeroTarjeta"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Número de tarjeta"
+                            android:inputType="number"
+                            android:maxLength="16" /> <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                        <EditText
+                            android:id="@+id/etFechaExpiracion"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="MM/AA"
+                            android:inputType="number"
+                            android:maxLength="5" />
+                        <EditText
+                            android:id="@+id/etCVV"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="CVV"
+                            android:inputType="numberPassword"
+                            android:maxLength="3" />
+                    </LinearLayout>
                     </LinearLayout>
                 </RadioGroup>
 

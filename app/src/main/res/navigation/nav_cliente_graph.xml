@@ -14,4 +14,9 @@
         android:name="com.example.sweettemptation.activities.PedidoFragment"
         android:label="Pedido"/>
 
+    <fragment
+        android:id="@+id/fragmentPago"
+        android:name="com.example.sweettemptation.activities.PagoFragment"
+        android:label="Pago"/>
+
 </navigation>

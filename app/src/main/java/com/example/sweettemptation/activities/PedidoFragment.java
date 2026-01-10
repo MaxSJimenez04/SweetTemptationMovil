@@ -29,6 +29,7 @@ import com.example.sweettemptation.model.Pedido;
 import com.example.sweettemptation.utils.Constantes;
 import com.example.sweettemptation.utils.UserSession;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 
 public class PedidoFragment extends Fragment {
@@ -159,14 +160,27 @@ public class PedidoFragment extends Fragment {
                         Toast.LENGTH_LONG).show();
             }
         });
-        btnPagar.setOnClickListener(v -> {
-           mViewModel.descargarTicket(pedidoActual.getId());
-        });
+
+        //btnPagar.setOnClickListener(v -> {
+          // mViewModel.descargarTicket(pedidoActual.getId());
+        //});
 
 
         btnPagar.setOnClickListener(v -> {
-            //TODO:
-           //NavHostFragment.findNavController(this).navigate(ID_FRAGMENT_PAGO);
+            Pedido pedido = mViewModel.getPedidoActual().getValue();
+            BigDecimal totalBD = mViewModel.getTotalPedido().getValue();
+
+            if (pedido != null && totalBD != null) {
+                mViewModel.recalcularTotal(pedido.getId());
+
+                Bundle bundle = new Bundle();
+                bundle.putInt("idPedido", pedido.getId());
+                bundle.putDouble("totalPedido", totalBD.doubleValue());
+
+                NavHostFragment.findNavController(this).navigate(R.id.fragmentPago, bundle);
+            } else {
+                Toast.makeText(requireContext(), "No hay un pedido activo para pagar", Toast.LENGTH_SHORT).show();
+            }
         });
 
         mViewModel.getProductosPedido().observe(getViewLifecycleOwner(), lista -> {
