@@ -42,6 +42,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/txtRangoFechas"
+        android:textStyle="bold"
         />
 
     <Spinner
@@ -188,7 +189,6 @@
                 <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="—" android:padding="8dp"/>
             </TableRow>
         </TableLayout>
-
     </LinearLayout>
 
     <ProgressBar
