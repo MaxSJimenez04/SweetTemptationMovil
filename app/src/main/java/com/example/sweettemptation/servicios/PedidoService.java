@@ -5,6 +5,9 @@ import com.example.sweettemptation.interfaces.ApiResult;
 import com.example.sweettemptation.interfaces.PedidoApi;
 import com.example.sweettemptation.network.ValidacionesRespuesta;
 import com.example.sweettemptation.utils.Constantes;
+
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -147,6 +150,25 @@ public class PedidoService {
        });
        return call;
    }
+
+    public Call<List<PedidoDTO>> obtenerHistorial(int idCliente, ResultCallback<List<PedidoDTO>> cb) {
+        Call<List<PedidoDTO>> call = api.obtenerHistorial(idCliente);
+        call.enqueue(new Callback<List<PedidoDTO>>() {
+            @Override
+            public void onResponse(Call<List<PedidoDTO>> call, Response<List<PedidoDTO>> response) {
+                if (response.isSuccessful()) {
+                    cb.onResult(ApiResult.exito(response.body(), response.code()));
+                } else {
+                    cb.onResult(ApiResult.fallo(response.code(), "Error al obtener historial"));
+                }
+            }
+            @Override
+            public void onFailure(Call<List<PedidoDTO>> call, Throwable t) {
+                cb.onResult(ApiResult.fallo(503, Constantes.MENSAJE_SIN_CONEXION));
+            }
+        });
+        return call;
+    }
 
 
 }

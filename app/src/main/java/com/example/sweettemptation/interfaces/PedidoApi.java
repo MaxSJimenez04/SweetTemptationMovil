@@ -21,4 +21,7 @@ public interface PedidoApi {
 
     @PUT("pedido/")
     Call<Void> cancelarPedido(@Query("idPedido") int idPedido);
+
+    @GET("pedido/historial")
+    Call<List<PedidoDTO>> obtenerHistorial(@Query("idCliente") int idCliente);
 }

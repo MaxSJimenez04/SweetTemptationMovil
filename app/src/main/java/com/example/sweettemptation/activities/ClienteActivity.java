@@ -100,7 +100,7 @@ public class ClienteActivity extends AppCompatActivity {
                             navController.navigate(R.id.fragmentProductosCliente);
                             break;
                         case 1:
-                            Toast.makeText(this, "Pedidos próximamente", Toast.LENGTH_SHORT).show();
+                            navController.navigate(R.id.fragmentPedidosCliente);
                             break;
                         case 2: // Mi Carrito
                             navController.navigate(R.id.fragmentPedido);

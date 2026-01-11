@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_cliente_graph"
     app:startDestination="@id/fragmentProductosCliente">
 
@@ -18,5 +19,17 @@
         android:id="@+id/fragmentPago"
         android:name="com.example.sweettemptation.activities.PagoFragment"
         android:label="Pago"/>
+
+    <fragment
+        android:id="@+id/fragmentPedidosCliente"
+        android:name="com.example.sweettemptation.activities.HistorialPedidosFragment"
+        android:label="Historial de Pedidos"
+        tools:layout="@layout/fragment_historial_pedido" />
+
+    <fragment
+        android:id="@+id/fragmentResumenPedido"
+        android:name="com.example.sweettemptation.activities.ResumenPedidoFragment"
+        android:label="Resumen de Pedido"
+        tools:layout="@layout/fragment_pedido" />
 
 </navigation>
