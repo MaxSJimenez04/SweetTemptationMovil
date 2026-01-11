@@ -225,7 +225,9 @@ public class PagoFragment extends Fragment {
                 pagoService.realizarPago(idPedido, request, resultado -> {
                     if (result.isExito()) {
                         descargarTicket(idPedido);
+
                         requireActivity().runOnUiThread(() -> {
+                            Toast.makeText(requireContext(), "Pago exitoso", Toast.LENGTH_LONG).show();
                             NavController navController =
                                     NavHostFragment.findNavController(
                                             requireActivity()

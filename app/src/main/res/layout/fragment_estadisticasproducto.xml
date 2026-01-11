@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
+    android:background="#FFF7F7"
     android:padding="16dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -27,8 +28,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/estadisticasProductoTitulo"
-            android:textSize="20sp"
+            android:textSize="30sp"
             android:textStyle="bold"
+            android:textColor="@color/primary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -40,6 +42,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/txtRangoFechas"
+        android:textStyle="bold"
         />
 
     <Spinner
@@ -186,7 +189,6 @@
                 <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="—" android:padding="8dp"/>
             </TableRow>
         </TableLayout>
-
     </LinearLayout>
 
     <ProgressBar
