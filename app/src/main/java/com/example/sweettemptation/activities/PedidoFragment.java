@@ -150,32 +150,13 @@ public class PedidoFragment extends Fragment {
             mViewModel.cancelarPedido(pedidoActual.getId(), idCliente);
         });
 
-        //TODO: borrar prueba generar ticket
-        //Empieza grpc
-        mViewModel.init(requireContext());
-        mViewModel.ticketDescargado.observe(getViewLifecycleOwner(), uri -> {
-            if (uri != null) {
-                Toast.makeText(requireContext(),
-                        "Ticket descargado correctamente",
-                        Toast.LENGTH_LONG).show();
-            }
-        });
-
-        //btnPagar.setOnClickListener(v -> {
-          // mViewModel.descargarTicket(pedidoActual.getId());
-        //});
-
 
         btnPagar.setOnClickListener(v -> {
-            Pedido pedido = mViewModel.getPedidoActual().getValue();
-            BigDecimal totalBD = mViewModel.getTotalPedido().getValue();
-
-            if (pedido != null && totalBD != null) {
-                mViewModel.recalcularTotal(pedido.getId());
-
+            if (pedidoActual != null && pedidoActual.getTotal() != null) {
+                mViewModel.recalcularTotal(pedidoActual.getId());
                 Bundle bundle = new Bundle();
-                bundle.putInt("idPedido", pedido.getId());
-                bundle.putDouble("totalPedido", totalBD.doubleValue());
+                bundle.putInt("idPedido", pedidoActual.getId());
+                bundle.putDouble("totalPedido", pedidoActual.getTotal().doubleValue());
 
                 NavHostFragment.findNavController(this).navigate(R.id.fragmentPago, bundle);
             } else {

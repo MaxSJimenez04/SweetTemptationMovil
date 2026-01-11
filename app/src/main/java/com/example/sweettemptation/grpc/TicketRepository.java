@@ -9,9 +9,6 @@ public class TicketRepository {
 
     public interface Callback {
         void onSuccess(Uri uri);
-
-        void onSuccess(io.grpc.Uri uri);
-
         void onError(Throwable error);
     }
 

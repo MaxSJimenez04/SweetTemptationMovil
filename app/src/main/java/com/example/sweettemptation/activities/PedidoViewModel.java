@@ -12,7 +12,6 @@ import com.example.sweettemptation.dto.ArchivoDTO;
 import com.example.sweettemptation.dto.DetallesProductoDTO;
 import com.example.sweettemptation.dto.PedidoDTO;
 import com.example.sweettemptation.dto.ProductoPedidoDTO;
-import com.example.sweettemptation.grpc.TicketRepository;
 import com.example.sweettemptation.interfaces.ApiResult;
 import com.example.sweettemptation.interfaces.ArchivoApi;
 import com.example.sweettemptation.interfaces.PedidoApi;
@@ -40,12 +39,10 @@ public class PedidoViewModel extends ViewModel {
     public final MutableLiveData<BigDecimal> subtotalPedido = new MutableLiveData<>(BigDecimal.ZERO);
     public final MutableLiveData<BigDecimal> totalPedido = new MutableLiveData<>(BigDecimal.ZERO);
 
-    public final MutableLiveData<android.net.Uri> ticketDescargado = new MutableLiveData<android.net.Uri>(null);
-
     private final PedidoService pedidoService;
     private final ProductoPedidoService productoPedidoService;
     private final ArchivoService archivoService;
-    private final TicketRepository ticketRepository = new TicketRepository();
+
 
     public PedidoViewModel(){
         PedidoApi pedidoApi = ApiCliente.getInstance().retrofit().create(PedidoApi.class);
@@ -56,10 +53,6 @@ public class PedidoViewModel extends ViewModel {
         this.archivoService = new ArchivoService(archivoApi);
     }
 
-    public void init(Context context){
-        ticketRepository.init(context);
-
-    }
 
     public LiveData<Pedido> getPedidoActual(){
         return pedidoActual;
@@ -340,36 +333,5 @@ public class PedidoViewModel extends ViewModel {
         });
     }
 
-    public void descargarTicket(int idPedido) {
-        cargando.postValue(true);
-        mensaje.postValue(null);
-
-        ticketRepository.descargarTicket(idPedido,
-                new TicketRepository.Callback() {
-                    @Override
-                    public void onSuccess(android.net.Uri uri) {
-                        cargando.postValue(false);
-                        ticketDescargado.postValue(uri);
-                        mensaje.postValue("Ticket guardado en Descargas");
-                    }
-
-                    @Override
-                    public void onSuccess(Uri uri) {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable error) {
-                        cargando.postValue(false);
-                        mensaje.postValue(error.getMessage());
-                    }
-                });
-    }
-
-    @Override
-    protected void onCleared() {
-        super.onCleared();
-        ticketRepository.close();
-    }
 
 }

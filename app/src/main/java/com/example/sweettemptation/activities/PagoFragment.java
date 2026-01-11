@@ -1,6 +1,10 @@
 package com.example.sweettemptation.activities;
 
+import static android.widget.Toast.LENGTH_SHORT;
+
+import android.content.Context;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -16,16 +20,24 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.sweettemptation.R;
 import com.example.sweettemptation.auth.TokenStorage;
+import com.example.sweettemptation.dto.DetallesProductoDTO;
 import com.example.sweettemptation.dto.PagoRequest;
+import com.example.sweettemptation.grpc.TicketRepository;
 import com.example.sweettemptation.interfaces.PagoApi;
+import com.example.sweettemptation.interfaces.ProductoPedidoApi;
+import com.example.sweettemptation.network.ApiCliente;
 import com.example.sweettemptation.servicios.PagoService;
+import com.example.sweettemptation.servicios.ProductoPedidoService;
 import com.example.sweettemptation.utils.Constantes;
 import com.google.android.material.button.MaterialButton;
+
+import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -39,10 +51,20 @@ public class PagoFragment extends Fragment {
     private EditText etMontoRecibido, etNombreTarjeta, etNumeroTarjeta, etFechaExpiracion, etCVV;
     private TextView tvCambioCalculado, tvTotalLabel;
     private MaterialButton btnConfirmarPago;
-
+    private ProductoPedidoService productoPedidoService;
+    private List<DetallesProductoDTO> productos;
     private PagoService pagoService;
     private int idPedido;
     private double totalAPagar;
+
+    private android.net.Uri ticketDescargado;
+
+    private final TicketRepository ticketRepository = new TicketRepository();
+
+    public void init(Context context){
+        ticketRepository.init(context);
+
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -52,29 +74,16 @@ public class PagoFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        init(requireContext());
 
         if (getArguments() != null) {
             idPedido = getArguments().getInt("idPedido", 0);
             totalAPagar = getArguments().getDouble("totalPedido", 0.0);
         }
 
-        TokenStorage storage = new TokenStorage(requireContext());
-        String token = storage.getToken();
-
-        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(chain -> {
-            Request newRequest = chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer " + token)
-                    .build();
-            return chain.proceed(newRequest);
-        }).build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constantes.URL)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        PagoApi api = retrofit.create(PagoApi.class);
+        PagoApi api = ApiCliente.getInstance().retrofit().create(PagoApi.class);
+        ProductoPedidoApi productoPedidoApi = ApiCliente.getInstance().retrofit().create(ProductoPedidoApi.class);
+        productoPedidoService = new ProductoPedidoService(productoPedidoApi);
         pagoService = new PagoService(api);
 
         rgMetodoPago = view.findViewById(R.id.rgMetodoPago);
@@ -138,7 +147,7 @@ public class PagoFragment extends Fragment {
     private void validarYEnviar() {
         int seleccionado = rgMetodoPago.getCheckedRadioButtonId();
         if (seleccionado == -1) {
-            Toast.makeText(requireContext(), "Seleccione un método de pago", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Seleccione un método de pago", LENGTH_SHORT).show();
             return;
         }
 
@@ -201,21 +210,43 @@ public class PagoFragment extends Fragment {
 
     private void ejecutarPeticion(String tipo, double monto, String detalles) {
         PagoRequest request = new PagoRequest(tipo, monto, detalles);
-
-        pagoService.realizarPago(idPedido, request, result -> {
-            if (result.isExito()) {
-                Toast.makeText(requireContext(), "¡Pago exitoso! " + result.datos.getMensajeConfirmacion(), Toast.LENGTH_LONG).show();
-
-                NavOptions navOptions = new NavOptions.Builder()
-                        .setPopUpTo(R.id.fragmentPedido, true)
-                        .build();
-
-                NavHostFragment.findNavController(this)
-                        .navigate(R.id.fragmentProductosCliente, null, navOptions);
-            } else {
-                Toast.makeText(requireContext(), result.mensaje, Toast.LENGTH_LONG).show();
+        productoPedidoService.consultarProductos(idPedido, result -> {
+            if (result.codigo != 200 || result.datos == null || result.datos.isEmpty()){
+                Toast.makeText(requireContext(), "No se encontraron productos", LENGTH_SHORT).show();
+                return;
             }
+            productos = result.datos;
+
+            productoPedidoService.comprarProductos(idPedido, productos, respuesta -> {
+                if (respuesta.codigo != 200){
+                    Toast.makeText(requireContext(), "Uno o más productos agotaron sus existencias", LENGTH_SHORT).show();
+                    return;
+                }
+                pagoService.realizarPago(idPedido, request, resultado -> {
+                    if (result.isExito()) {
+                        descargarTicket(idPedido);
+                        requireActivity().runOnUiThread(() -> {
+                            NavController navController =
+                                    NavHostFragment.findNavController(
+                                            requireActivity()
+                                                    .getSupportFragmentManager()
+                                                    .findFragmentById(R.id.nav_host)
+                                    );
+                            navController.navigate(
+                                    R.id.fragmentProductosCliente,
+                                    null,
+                                    new NavOptions.Builder()
+                                            .setPopUpTo(R.id.fragmentPedido, true)
+                                            .build()
+                            );
+                        });
+                    } else {
+                        Toast.makeText(requireContext(), result.mensaje, Toast.LENGTH_LONG).show();
+                    }
+                });
+            });
         });
+
     }
 
     private void calcularCambio() {
@@ -236,4 +267,33 @@ public class PagoFragment extends Fragment {
             }
         }
     }
+
+
+    public void descargarTicket(int idPedido) {
+        ticketRepository.descargarTicket(idPedido, new TicketRepository.Callback() {
+            @Override
+            public void onSuccess(Uri uri) {
+                if (!isAdded()) return;
+                requireActivity().runOnUiThread(() -> {
+                    ticketDescargado = uri;
+                    Toast.makeText(
+                            requireContext(),
+                            "Ticket descargado en la carpeta Descargas",
+                            Toast.LENGTH_LONG
+                    ).show();
+                });
+            }
+            @Override
+            public void onError(Throwable error) {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(
+                            requireContext(),
+                            "Hubo un problema al descargar el ticket",
+                            Toast.LENGTH_LONG
+                    ).show();
+                });
+            }
+        });
+    }
+
 }
