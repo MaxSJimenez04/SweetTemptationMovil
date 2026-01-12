@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/nav_admin_graph"
-    app:startDestination="@id/fragmentSeleccionarEstadisticas">
+    android:id="@+id/nav_admin_graph">
 
     <fragment
         android:id="@+id/fragmentSeleccionarEstadisticas"
@@ -10,12 +9,9 @@
         android:label="Seleccionar Estadisticas">
         <action
             android:id="@+id/action_SeleccionarEstadisticas_EstadisticasProductos"
-            app:destination="@id/fragmentEstadisticasProductos"
-            app:enterAnim="@android:anim/fade_in"
-            app:exitAnim="@android:anim/fade_out"
-            app:popEnterAnim="@android:anim/fade_in"
-            app:popExitAnim="@android:anim/fade_out" />
+            app:destination="@id/fragmentEstadisticasProductos"/>
     </fragment>
+
     <fragment
         android:id="@+id/fragmentEstadisticasProductos"
         android:name="com.example.sweettemptation.activities.EstadisticasProductoFragment"
@@ -23,25 +19,18 @@
     </fragment>
 
     <fragment
-        android:id="@+id/fragmentEstadisticasVentas"
-        android:name="com.example.sweettemptation.activities.ReporteVentasFragment"
-        android:label="Estadisticas Ventas"
-        />
-
-
-    <fragment
-        android:id="@+id/fragmentCatalogoProductos"
-        android:name="com.example.sweettemptation.activities.ProductoFragment"
-        android:label="Catalogo de Productos"/>
+        android:id="@+id/fragmentGestionUsuarios"
+        android:name="com.example.sweettemptation.activities.GestionUsuariosFragment"
+        android:label="Gestión de Cuentas">
+        <action
+            android:id="@+id/action_GestionUsuarios_FormularioUsuario"
+            app:destination="@id/fragmentFormularioUsuario"/>
+    </fragment>
 
     <fragment
-        android:id="@+id/fragmentRegistrarProducto"
-        android:name="com.example.sweettemptation.activities.RegistrarProductoFragment"
-        android:label="Registrar Producto" />
-
-    <fragment
-        android:id="@+id/fragmentDetalleProducto"
-        android:name="com.example.sweettemptation.activities.DetalleProductoFragment"
-        android:label="Detalle de Producto" />
+        android:id="@+id/fragmentFormularioUsuario"
+        android:name="com.example.sweettemptation.activities.FormularioUsuarioFragment"
+        android:label="Formulario Usuario">
+    </fragment>
 
 </navigation>

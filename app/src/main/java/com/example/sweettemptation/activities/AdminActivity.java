@@ -3,12 +3,14 @@ package com.example.sweettemptation.activities;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
+import android.view.Window;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 import com.example.sweettemptation.R;
 import com.example.sweettemptation.auth.TokenStorage;
@@ -18,23 +20,17 @@ public class AdminActivity extends AppCompatActivity {
 
     private ActivityAdminBinding binding;
     private TokenStorage tokenStorage;
-    private NavController navController; // Definirlo como variable global
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        
         binding = ActivityAdminBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        
+        // Inicializar TokenStorage (necesario para cerrar sesión)
         tokenStorage = new TokenStorage(this);
-
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.nav_host);
-        if (navHostFragment != null) {
-            navController = navHostFragment.getNavController();
-        }
-
+        
         configurarMenus();
         configurarFab();
     }
@@ -48,18 +44,17 @@ public class AdminActivity extends AppCompatActivity {
             return false;
         });
 
+        // Menú inferior
         binding.abBottom.setOnMenuItemClickListener(item -> {
             int id = item.getItemId();
-            if (navController == null) return false;
-
             if (id == R.id.btnEstadisticas) {
-                navController.navigate(R.id.fragmentSeleccionarEstadisticas);
+                reemplazarFragmento(new SeleccionarEstadisticasFragment());
                 return true;
             } else if (id == R.id.btnCuentas) {
-                // TODO: Navegar a gestión de cuentas
+                reemplazarFragmento(new GestionUsuariosFragment());
                 return true;
             } else if (id == R.id.btnProductos) {
-                navController.navigate(R.id.fragmentCatalogoProductos);
+                reemplazarFragmento(new CatalogoProductosClienteFragment());
                 return true;
             }
             return false;
@@ -79,17 +74,15 @@ public class AdminActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Hola, " + nombre)
                 .setItems(opciones, (dialog, which) -> {
-                    if (navController == null) return;
-
                     switch (which) {
                         case 0:
-                            navController.navigate(R.id.fragmentCatalogoProductos);
+                            reemplazarFragmento(new CatalogoProductosClienteFragment());
                             break;
                         case 1:
-                            navController.navigate(R.id.fragmentSeleccionarEstadisticas);
+                            reemplazarFragmento(new SeleccionarEstadisticasFragment());
                             break;
                         case 2:
-                            // TODO: Navegar a cuentas
+                            reemplazarFragmento(new GestionUsuariosFragment());
                             break;
                         case 3:
                             Toast.makeText(this, "Perfil próximamente", Toast.LENGTH_SHORT).show();
@@ -100,6 +93,20 @@ public class AdminActivity extends AppCompatActivity {
                     }
                 })
                 .show();
+    }
+
+    private void reemplazarFragmento(Fragment fragmento) {
+        Fragment actual = getSupportFragmentManager().findFragmentById(R.id.nav_host);
+
+        // Solo reemplazamos si el fragmento nuevo es distinto al que ya se ve
+        if (actual == null || !actual.getClass().equals(fragmento.getClass())) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .replace(R.id.nav_host, fragmento)
+                    .addToBackStack(null)
+                    .commit();
+        }
     }
 
     private void mostrarMenuCuenta() {
@@ -138,4 +145,5 @@ public class AdminActivity extends AppCompatActivity {
         super.onDestroy();
         binding = null;
     }
+
 }
