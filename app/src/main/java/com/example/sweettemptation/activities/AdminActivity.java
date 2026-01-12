@@ -51,7 +51,7 @@ public class AdminActivity extends AppCompatActivity {
                 reemplazarFragmento(new SeleccionarEstadisticasFragment());
                 return true;
             } else if (id == R.id.btnCuentas) {
-                //TODO: cambiar a fragment de gestionar cuentas
+                reemplazarFragmento(new GestionUsuariosFragment());
                 return true;
             } else if (id == R.id.btnProductos) {
                 reemplazarFragmento(new CatalogoProductosClienteFragment());
@@ -82,7 +82,7 @@ public class AdminActivity extends AppCompatActivity {
                             reemplazarFragmento(new SeleccionarEstadisticasFragment());
                             break;
                         case 2:
-                            //TODO: cambiar a gestionar cuentas
+                            reemplazarFragmento(new GestionUsuariosFragment());
                             break;
                         case 3:
                             Toast.makeText(this, "Perfil próximamente", Toast.LENGTH_SHORT).show();
