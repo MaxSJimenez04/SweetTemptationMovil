@@ -17,17 +17,12 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.sweettemptation.R;
-import com.example.sweettemptation.auth.TokenStorage;
 import com.example.sweettemptation.dto.SolicitudPersonalizadaDTO;
 import com.example.sweettemptation.interfaces.PedidoPersonalizadoApi;
+import com.example.sweettemptation.network.ApiCliente;
 import com.example.sweettemptation.servicios.PedidoCustomService;
 import com.example.sweettemptation.utils.Constantes;
 import com.example.sweettemptation.utils.UserSession;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SolicitarPedidoCustomFragment extends Fragment {
 
@@ -58,7 +53,9 @@ public class SolicitarPedidoCustomFragment extends Fragment {
         pbProgreso = view.findViewById(R.id.pbProgreso);
 
         configurarSpinners();
-        inicializarServicio();
+
+        PedidoPersonalizadoApi api = ApiCliente.getInstance().retrofit().create(PedidoPersonalizadoApi.class);
+        service = new PedidoCustomService(api);
 
         ActivityResultLauncher<Intent> launcher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -78,28 +75,6 @@ public class SolicitarPedidoCustomFragment extends Fragment {
         });
 
         btnEnviar.setOnClickListener(v -> validarYEnviar());
-    }
-
-    private void inicializarServicio() {
-        try {
-            TokenStorage storage = new TokenStorage(requireContext());
-            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(chain -> {
-                Request r = chain.request().newBuilder()
-                        .addHeader("Authorization", "Bearer " + storage.getToken())
-                        .build();
-                return chain.proceed(r);
-            }).build();
-
-            Retrofit r = new Retrofit.Builder()
-                    .baseUrl(Constantes.URL)
-                    .client(client)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-
-            service = new PedidoCustomService(r.create(PedidoPersonalizadoApi.class));
-        } catch (Exception e) {
-            Toast.makeText(requireContext(), "Error al inicializar servicios", Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void configurarSpinners() {
@@ -122,6 +97,7 @@ public class SolicitarPedidoCustomFragment extends Fragment {
         }
 
         int idCliente = UserSession.getUserId(requireContext());
+
         String tel = requireContext().getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
                 .getString("user_phone", "No proporcionado");
 
@@ -132,7 +108,7 @@ public class SolicitarPedidoCustomFragment extends Fragment {
                 spRelleno.getSelectedItem().toString(),
                 spCobertura.getSelectedItem().toString(),
                 specs,
-                imageUri != null ? imageUri.toString() : "sin-imagen",
+                imageUri != null ? imageUri.toString() : "sin-imagen", // Imagen opcional
                 tel
         );
 
