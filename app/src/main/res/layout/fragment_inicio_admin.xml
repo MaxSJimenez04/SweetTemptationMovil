@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="32dp">
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginTop="24dp"
+            android:src="@drawable/logo_sweettemptation2"
+            android:contentDescription="Logo" />
+
+        <TextView
+            android:id="@+id/tvSaludo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="¡Hola, Usuario!"
+            android:textColor="@color/primary"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/tvRol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Administrador"
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:orientation="vertical">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCatalogo"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Ver Catálogo"
+                android:textSize="16sp"
+                app:icon="@drawable/icon_productos"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:cornerRadius="12dp"
+                app:backgroundTint="@color/primary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEstadisticas"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:text="Ver Estadísticas"
+                android:textSize="16sp"
+                app:icon="@drawable/icon_estadisticas"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:cornerRadius="12dp"
+                app:backgroundTint="@color/primary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCuentas"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:text="Gestión de Cuentas"
+                android:textSize="16sp"
+                app:icon="@drawable/icon_empleados"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:cornerRadius="12dp"
+                app:backgroundTint="@color/primary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPerfil"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:text="Mi Perfil"
+                android:textSize="16sp"
+                app:icon="@drawable/icon_cuenta"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:strokeColor="@color/primary"
+                android:textColor="@color/primary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCerrarSesion"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:text="Cerrar Sesión"
+                android:textSize="16sp"
+                app:icon="@drawable/icon_logout"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:cornerRadius="12dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:strokeColor="@color/error"
+                android:textColor="@color/error"
+                app:iconTint="@color/error" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
+
