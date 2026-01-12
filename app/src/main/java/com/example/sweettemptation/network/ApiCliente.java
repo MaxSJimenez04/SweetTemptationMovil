@@ -43,7 +43,7 @@ public final class ApiCliente {
 
         Moshi moshi = new Moshi.Builder()
                 .add(new LocalDateTimeJsonAdapter())
-                .add(new BigDecimalJsonAdapter())
+                .add(new BigDecimalJsonAdapter()).add(new DateJsonAdapter())
                 .build();
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();

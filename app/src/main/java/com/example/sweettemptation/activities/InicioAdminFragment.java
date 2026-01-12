@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.sweettemptation.R;
 import com.example.sweettemptation.auth.TokenStorage;
@@ -50,28 +51,28 @@ public class InicioAdminFragment extends Fragment {
     }
 
     private void configurarListeners() {
-        binding.btnCatalogo.setOnClickListener(v -> navegarA(new CatalogoProductosClienteFragment()));
-
-        binding.btnEstadisticas.setOnClickListener(v -> navegarA(new SeleccionarEstadisticasFragment()));
-
-        binding.btnCuentas.setOnClickListener(v -> navegarA(new GestionUsuariosFragment()));
-
-        binding.btnPerfil.setOnClickListener(v -> 
-            Toast.makeText(requireContext(), "Perfil próximamente", Toast.LENGTH_SHORT).show()
+        binding.btnCatalogo.setOnClickListener(v ->
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.fragmentCatalogoProductos)
         );
 
-        binding.btnCerrarSesion.setOnClickListener(v -> confirmarCerrarSesion());
-    }
+        binding.btnEstadisticas.setOnClickListener(v ->
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.fragmentSeleccionarEstadisticas)
+        );
 
-    private void navegarA(Fragment fragmento) {
-        if (getActivity() != null) {
-            getActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                    .replace(R.id.nav_host, fragmento)
-                    .addToBackStack(null)
-                    .commit();
-        }
+        binding.btnCuentas.setOnClickListener(v ->
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.fragmentGestionUsuarios)
+        );
+
+        binding.btnPerfil.setOnClickListener(v ->
+                Toast.makeText(requireContext(), "Perfil próximamente", Toast.LENGTH_SHORT).show()
+        );
+
+        binding.btnCerrarSesion.setOnClickListener(v ->
+                confirmarCerrarSesion()
+        );
     }
 
     private void confirmarCerrarSesion() {

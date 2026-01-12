@@ -3,7 +3,7 @@ package com.example.sweettemptation.utils;
 public class Constantes {
     public static final String PUERTO = "8080";
     public static final int PUERTO_GRPC = 9090;
-    public static final String IP = "localhost";
+    public static final String IP = "10.0.2.2";
     public static final String URL = "http://" + IP + ":" + PUERTO + "/";
     public static final String URL_GRPC= "http://" + IP + ":" + PUERTO;
     public static final int IVA = 16;
