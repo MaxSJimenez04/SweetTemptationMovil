@@ -32,4 +32,9 @@
         android:label="Resumen de Pedido"
         tools:layout="@layout/fragment_pedido" />
 
+    <fragment
+        android:id="@+id/fragmentProductoPersonalizado"
+        android:name="com.example.sweettemptation.activities.SolicitarPedidoCustomFragment"
+        android:label="Pedido Personalizado"/>
+
 </navigation>
