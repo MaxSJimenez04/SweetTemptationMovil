@@ -63,7 +63,7 @@ public class ClienteActivity extends AppCompatActivity {
             NavController navController = navHostFragment.getNavController();
             int id = item.getItemId();
             if (id == R.id.btnHistorial) {
-                Toast.makeText(this, "Historial próximamente", Toast.LENGTH_SHORT).show();
+                navController.navigate(R.id.fragmentPedidosCliente);
                 return true;
             } else if (id == R.id.btnCarrito) {
                 navController.navigate(R.id.fragmentPedido);
@@ -84,7 +84,7 @@ public class ClienteActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         String nombre = prefs.getString("user_nombre", "Usuario");
 
-        String[] opciones = {"Ver Catálogo", "Mis Pedidos", "Mi Carrito", "Mi Perfil", "Cerrar Sesión"};
+        String[] opciones = {"Ver Catálogo", "Solicitar pedido personalizado", "Mis Pedidos", "Mi Carrito", "Mi Perfil", "Cerrar Sesión"};
 
         new AlertDialog.Builder(this)
                 .setTitle("Hola, " + nombre)
@@ -100,15 +100,18 @@ public class ClienteActivity extends AppCompatActivity {
                             navController.navigate(R.id.fragmentProductosCliente);
                             break;
                         case 1:
+                            navController.navigate(R.id.fragmentProductoPersonalizado);
+                            break;
+                        case 2:
                             navController.navigate(R.id.fragmentPedidosCliente);
                             break;
-                        case 2: // Mi Carrito
+                        case 3: // Mi Carrito
                             navController.navigate(R.id.fragmentPedido);
                             break;
-                        case 3:
+                        case 4:
                             Toast.makeText(this, "Perfil próximamente", Toast.LENGTH_SHORT).show();
                             break;
-                        case 4:
+                        case 5:
                             confirmarCerrarSesion();
                             break;
                     }
