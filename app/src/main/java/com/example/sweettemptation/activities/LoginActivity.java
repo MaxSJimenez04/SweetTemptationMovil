@@ -4,14 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.sweettemptation.MainActivity;
 import android.content.SharedPreferences;
@@ -29,11 +28,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements RecuperarPasswordFragment.OnRecuperarPasswordListener {
 
     private ActivityLoginBinding binding;
     private TokenStorage tokenStorage;
     private AuthApi authApi;
+    private boolean fragmentRecuperarVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +61,9 @@ public class LoginActivity extends AppCompatActivity {
 
         // Configurar listeners
         configurarListeners();
+        
+        // Manejar botón back del sistema
+        configurarOnBackPressed();
     }
 
     private void configurarListeners() {
@@ -68,9 +71,60 @@ public class LoginActivity extends AppCompatActivity {
         binding.btnLogin.setOnClickListener(v -> intentarLogin());
 
         // Link de recuperar contraseña
-        binding.tvRecuperar.setOnClickListener(v -> {
-            // TODO: Implementar navegación a RecuperarContrasenaActivity
-            Toast.makeText(this, "Función próximamente disponible", Toast.LENGTH_SHORT).show();
+        binding.tvRecuperar.setOnClickListener(v -> mostrarRecuperarPassword());
+    }
+
+    private void mostrarRecuperarPassword() {
+        fragmentRecuperarVisible = true;
+        
+        // Ocultar login y mostrar contenedor del fragment
+        binding.loginContainer.setVisibility(View.GONE);
+        binding.fragmentContainer.setVisibility(View.VISIBLE);
+        
+        // Cargar el fragment
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                .replace(R.id.fragmentContainer, new RecuperarPasswordFragment())
+                .commit();
+    }
+
+    @Override
+    public void onCerrarRecuperarPassword() {
+        ocultarRecuperarPassword();
+    }
+
+    private void ocultarRecuperarPassword() {
+        fragmentRecuperarVisible = false;
+        
+        // Remover el fragment
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .remove(fragment)
+                    .commit();
+        }
+        
+        // Mostrar login y ocultar contenedor del fragment
+        binding.fragmentContainer.setVisibility(View.GONE);
+        binding.loginContainer.setVisibility(View.VISIBLE);
+    }
+
+    private void configurarOnBackPressed() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (fragmentRecuperarVisible) {
+                    // Si el fragment está visible, cerrarlo
+                    ocultarRecuperarPassword();
+                } else {
+                    // Comportamiento normal (salir de la app)
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
         });
     }
 
@@ -110,7 +164,6 @@ public class LoginActivity extends AppCompatActivity {
                     tokenStorage.saveToken(loginResponse.getToken());
                     UserSession.save(LoginActivity.this, loginResponse);
 
-
                     // Navegar según el rol
                     navegarSegunRol(loginResponse.getRol());
                     
@@ -145,7 +198,6 @@ public class LoginActivity extends AppCompatActivity {
         binding.etUsuario.setEnabled(!mostrar);
         binding.etPassword.setEnabled(!mostrar);
     }
-
 
     private void navegarSegunRol(String rol) {
         Intent intent;
@@ -215,4 +267,3 @@ public class LoginActivity extends AppCompatActivity {
         binding = null;
     }
 }
-
